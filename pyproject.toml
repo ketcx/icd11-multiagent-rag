@@ -1,0 +1,78 @@
+[project]
+name = "icd11-multiagent-rag"
+version = "0.1.0"
+requires-python = ">=3.11"
+
+dependencies = [
+    # --- LLM & Embeddings ---
+    "llama-cpp-python>=0.3.0",
+    "huggingface-hub>=0.27.0",
+    "sentence-transformers>=3.3.0",
+    "transformers>=4.47.0",
+
+    # --- RAG & Vector Store ---
+    "langchain>=0.3.14",
+    "langchain-community>=0.3.14",
+    "langchain-chroma>=0.2.2",
+    "langgraph>=0.2.60",
+    "chromadb>=0.5.23",
+    "rank-bm25>=0.2.2",
+
+    # --- PDF Processing ---
+    "pymupdf>=1.25.0",
+
+    # --- API & UI ---
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.34.0",
+    "streamlit>=1.41.0",
+
+    # --- Config & Schemas ---
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.7.0",
+    "pyyaml>=6.0.2",
+
+    # --- Utilities ---
+    "rich>=13.9.0",
+    "click>=8.1.0",
+    "python-dotenv>=1.0.1",
+    "tqdm>=4.67.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+    "httpx>=0.28.0",
+    "black>=24.0.0",
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["apps*", "configs*", "core*", "evals*", "knowledge*", "scripts*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]  # line length handled by black
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+warn_return_any = false

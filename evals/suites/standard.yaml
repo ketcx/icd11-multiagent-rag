@@ -1,0 +1,18 @@
+# Standard evaluation suite for ICD-11 Multi-Agent RAG
+# This suite runs automated sessions against a set of client profiles
+# and generates a consolidated report.
+
+name: standard
+description: Basic evaluation suite with common clinical profiles
+
+# List of client profile paths to evaluate
+profiles:
+  - evals/profiles/anxiety_basic.json
+  # Add more profiles here as they become available:
+  # - evals/profiles/depression_moderate.json
+  # - evals/profiles/trauma_ptsd.json
+
+# Optional: Evaluation parameters
+settings:
+  language: Español
+  seed: 42

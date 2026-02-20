@@ -1,0 +1,76 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Distribution / packaging
+*.tar.gz
+*.whl
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Type checking
+.mypy_cache/
+.ruff_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# Large model files (download separately via download_models.py)
+*.gguf
+*.bin
+*.pt
+*.pth
+*.safetensors
+
+# PDF source documents (user-supplied)
+files/*.pdf
+
+# Generated indexes and vector stores
+data/indexes/
+data/raw/
+data/chunks/
+
+# Session outputs and logs
+runs/
+logs/
+*.log
+
+# Temporary files
+tmp/
+.tmp/
+*.tmp
+
+# Build artifacts
+*.mo
+*.pot

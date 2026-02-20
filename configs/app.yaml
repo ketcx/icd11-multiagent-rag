@@ -1,0 +1,94 @@
+# ============================================
+# Configuración principal del sistema
+# ============================================
+
+# --- Modelos ---
+llm:
+  model_name: "bartowski/Phi-3-mini-4k-instruct-GGUF"
+  model_file: "Phi-3-mini-4k-instruct-Q4_K_M.gguf"
+  n_ctx: 4096               # Tamaño de contexto
+  n_gpu_layers: -1           # -1 = todas las capas en Metal
+  n_threads: 4               # Threads CPU (Apple Silicon optimal)
+  chat_format: "chatml"
+
+embeddings:
+  model_name: "NeuML/pubmedbert-base-embeddings"
+  device: "mps"              # mps | cpu
+  batch_size: 32
+  normalize: true
+
+# --- RAG ---
+retrieval:
+  collection_name: "icd11_es"
+  persist_dir: "data/indexes/chroma"
+  top_k_dense: 8
+  top_k_bm25: 8
+  top_k_final: 6
+
+chunking:
+  chunk_size: 1000           # tokens
+  chunk_overlap: 150
+  min_chunk_size: 200
+  max_chunk_size: 1500
+  respect_sections: true
+  respect_codes: true
+
+# --- Agentes ---
+agents:
+  therapist:
+    temperature: 0.7
+    max_tokens: 256
+  client:
+    temperature: 0.8
+    max_tokens: 200
+  diagnostician:
+    temperature: 0.3         # Más determinístico
+    max_tokens: 1024
+  auditor:
+    temperature: 0.1
+    max_tokens: 512
+  safety:
+    temperature: 0.0
+    max_tokens: 128
+
+# --- Sesión ---
+session:
+  max_turns: 40              # Límite de turnos por sesión
+  domains:
+    - mood
+    - anxiety
+    - sleep
+    - eating
+    - substances
+    - psychosis
+    - trauma
+    - ocd
+    - cognition
+    - social_functioning
+    - suicidal_ideation
+
+# --- Paths ---
+paths:
+  files_dir: "./files"
+  data_dir: "./data"
+  runs_dir: "./runs"
+  logs_dir: "./logs"
+  models_dir: "./models"     # Override para modelos locales
+
+# --- Device ---
+device:
+  preferred: "mps"           # mps | cpu
+  fallback_to_cpu: true
+  precision: "fp32"          # fp32 para estabilidad en MPS
+
+# --- API ---
+api:
+  host: "0.0.0.0"
+  port: 8000
+  reload: true               # Desarrollo
+
+# --- Logging ---
+logging:
+  level: "INFO"
+  format: "json"
+  file: "logs/app.log"

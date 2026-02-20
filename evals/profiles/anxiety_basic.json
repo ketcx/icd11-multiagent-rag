@@ -1,0 +1,44 @@
+{
+  "profile_id": "anxiety_basic",
+  "language": "Español",
+  "demographics": {
+    "name": "Alex",
+    "age": 34,
+    "gender": "no binario",
+    "occupation": "diseñador gráfico",
+    "background": "Vive solo/a en la ciudad. Sin antecedentes psiquiátricos previos."
+  },
+  "presenting_complaints": [
+    "preocupación excesiva",
+    "dificultad para dormir",
+    "inquietud constante"
+  ],
+  "history": "Estrés laboral durante los últimos 6 meses. Dificultad para desconectar del trabajo. Sin tratamiento psiquiátrico previo.",
+  "clinical": {
+    "primary_label": "Trastorno de Ansiedad Generalizada",
+    "primary_code": "6B00",
+    "primary_symptoms": [
+      "preocupación excesiva y persistente",
+      "dificultad para controlar la preocupación",
+      "inquietud o sensación de estar al límite",
+      "fatiga",
+      "dificultad para concentrarse",
+      "irritabilidad",
+      "tensión muscular",
+      "alteraciones del sueño"
+    ],
+    "duration": "6 meses",
+    "severity": "moderado",
+    "negations": [
+      "sin ideas suicidas",
+      "sin síntomas psicóticos",
+      "sin consumo de sustancias"
+    ],
+    "comorbidities": [],
+    "functional_impairment": "Dificultad moderada en el trabajo debido a la concentración. Evita situaciones sociales ocasionalmente."
+  },
+  "behavioral": {
+    "communication_style": "abierto",
+    "emotional_tone": "preocupado pero colaborativo"
+  }
+}
