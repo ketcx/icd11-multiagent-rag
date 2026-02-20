@@ -12,7 +12,6 @@ import yaml
 from core.orchestration.graph import build_graph
 from core.orchestration.nodes import AGENTS
 
-
 # ---------------------------------------------------------------------------
 # Internationalisation (i18n)
 # ---------------------------------------------------------------------------

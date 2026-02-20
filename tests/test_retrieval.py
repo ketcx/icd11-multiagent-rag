@@ -8,7 +8,6 @@ from unittest.mock import MagicMock, patch
 from core.retrieval.retrievers import HybridRetriever
 from core.retrieval.query_builder import QueryBuilder
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

@@ -8,7 +8,6 @@ from unittest.mock import MagicMock, patch
 from core.agents.base import BaseAgent
 from core.agents.prompts import THERAPIST_PROMPT_EN
 
-
 # ---------------------------------------------------------------------------
 # Concrete stub for testing the abstract base
 # ---------------------------------------------------------------------------

@@ -137,8 +137,7 @@ def show_summary():
     print("\n" + "=" * 70)
     print("PIPELINE READY FOR TESTING")
     print("=" * 70)
-    print(
-        """
+    print("""
 ✅ Status: All components initialized
    
 To launch the UI:
@@ -166,8 +165,7 @@ To index full PDF:
 
 To diagnose:
    python scripts/diagnose_chroma.py
-"""
-    )
+""")
     print("=" * 70)
 
 
