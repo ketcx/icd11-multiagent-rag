@@ -1,2 +1,39 @@
--e .
--e .[dev]
+# Runtime dependencies for Streamlit Cloud deployment.
+# llama-cpp-python is intentionally excluded: it requires C++ compilation with
+# GPU-specific flags (Metal/CUDA) and is not available on Streamlit Cloud.
+# The app runs in mock mode automatically when the package is absent.
+#
+# For local development with full LLM inference, install via:
+#   uv pip install -e ".[dev]"
+
+# LLM ecosystem (cloud-safe subset)
+huggingface-hub>=0.27.0
+sentence-transformers>=3.3.0
+transformers>=4.47.0
+
+# RAG & vector store
+langchain>=0.3.14
+langchain-community>=0.3.14
+langchain-chroma>=0.2.2
+langgraph>=0.2.60
+chromadb>=0.5.23
+rank-bm25>=0.2.2
+
+# PDF processing
+pymupdf>=1.25.0
+
+# API & UI
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+streamlit>=1.41.0
+
+# Config & schemas
+pydantic>=2.10.0
+pydantic-settings>=2.7.0
+pyyaml>=6.0.2
+
+# Utilities
+rich>=13.9.0
+click>=8.1.0
+python-dotenv>=1.0.1
+tqdm>=4.67.0

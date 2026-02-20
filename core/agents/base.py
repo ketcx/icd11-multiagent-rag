@@ -1,4 +1,8 @@
-"""Base agent template with local LLM integration (llama-cpp-python)."""
+"""Base agent template with local LLM integration (llama-cpp-python).
+
+``llama-cpp-python`` is imported lazily inside ``_generate`` so that the
+module loads cleanly even when the package is not installed.
+"""
 
 from __future__ import annotations
 
