@@ -133,16 +133,16 @@ def load_agents() -> tuple[dict, str, bool]:
     """
     cfg = _load_config()
     from core.agents import create_llm
-    from core.agents.therapist import TherapistAgent
+    from core.agents.auditor import EvidenceAuditorAgent
     from core.agents.client import ClientAgent
     from core.agents.diagnostician import DiagnosticianAgent
-    from core.agents.auditor import EvidenceAuditorAgent
     from core.agents.prompts import (
-        get_therapist_prompt,
+        get_auditor_prompt,
         get_client_prompt,
         get_diagnostician_prompt,
-        get_auditor_prompt,
+        get_therapist_prompt,
     )
+    from core.agents.therapist import TherapistAgent
     from core.retrieval import init_rag_pipeline
 
     llm = None

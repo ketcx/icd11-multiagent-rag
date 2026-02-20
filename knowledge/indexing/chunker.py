@@ -41,7 +41,7 @@ def chunk_documents(pages: list[dict], config: ChunkConfig) -> list[dict]:
 
         # Simple split
         page_chunks = splitter.split_text(text)
-        for i, chunk_text in enumerate(page_chunks):
+        for chunk_text in page_chunks:
             # Try to associate codes and headings
             associated_codes = [c for c in page.get("codes", []) if c in chunk_text]
             metadata = {

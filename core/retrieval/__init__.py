@@ -15,7 +15,6 @@ class SimpleEmbeddings:
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
         """Create sparse TF-IDF-like vectors."""
         try:
-            import numpy as np
             from sklearn.feature_extraction.text import TfidfVectorizer
 
             vectorizer = TfidfVectorizer(max_features=384, stop_words="english")
@@ -40,8 +39,9 @@ def init_rag_pipeline():
         return _rag_pipeline
 
     try:
-        from langchain_chroma import Chroma
         from pathlib import Path
+
+        from langchain_chroma import Chroma
 
         # Path to the pre-built Chroma index
         chroma_path = Path(__file__).parent.parent.parent / "data" / "indexes" / "chroma"

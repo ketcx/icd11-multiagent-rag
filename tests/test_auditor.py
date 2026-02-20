@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 from core.agents.auditor import EvidenceAuditorAgent
 from core.agents.prompts import AUDITOR_PROMPT_EN

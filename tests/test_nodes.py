@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import pytest
-from core.orchestration.nodes import coverage_check, risk_check, init_session
+from core.orchestration.nodes import coverage_check, init_session, risk_check
 
 
 class TestInitSession:

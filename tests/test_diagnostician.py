@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import json
+from unittest.mock import MagicMock
+
 import pytest
-from unittest.mock import MagicMock, patch
 
 from core.agents.diagnostician import DiagnosticianAgent
 from core.agents.prompts import DIAGNOSTICIAN_PROMPT_EN

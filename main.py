@@ -58,9 +58,9 @@ def ingest(pdf: str, config: str) -> None:
     click.echo(f"  Collection  : {collection_name}")
     click.echo(f"  Index path  : {persist_dir}")
 
-    from knowledge.ingest.pdf_parser import extract_pages
-    from knowledge.indexing.chunker import ChunkConfig, chunk_documents
     from knowledge.indexing.chroma_builder import build_chroma_index
+    from knowledge.indexing.chunker import ChunkConfig, chunk_documents
+    from knowledge.ingest.pdf_parser import extract_pages
 
     pages = list(extract_pages(pdf_path))
     click.echo(f"  Extracted {len(pages)} pages.")
@@ -101,18 +101,17 @@ def run(profile: str, config: str, language: str | None, seed: int) -> None:
 
     session_language = language or client_profile.get("language", "Español")
 
-    click.echo(f"Starting session")
+    click.echo("Starting session")
     click.echo(f"  Profile  : {profile}")
     click.echo(f"  Language : {session_language}")
 
+    from datetime import datetime
+    from uuid import uuid4
+
     from core.orchestration.graph import build_graph
     from core.orchestration.state import SessionState
-    import uuid
-    from datetime import datetime, timezone
 
-    session_id = (
-        f"sess_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
-    )
+    session_id = f"sess_{datetime.now(datetime.UTC).strftime('%Y%m%d_%H%M%S')}_{uuid4().hex[:6]}"
 
     initial_state: SessionState = {
         "session_id": session_id,
@@ -176,6 +175,7 @@ def run(profile: str, config: str, language: str | None, seed: int) -> None:
 def serve(config: str, host: str | None, port: int | None) -> None:
     """Launches the FastAPI REST API and the Streamlit UI."""
     import threading
+
     import uvicorn
 
     cfg = _load_config(config)
@@ -222,8 +222,6 @@ def serve(config: str, host: str | None, port: int | None) -> None:
 )
 def eval(suite: str, config: str, output: str) -> None:
     """Runs an evaluation suite and writes a JSON report."""
-    cfg = _load_config(config)
-
     with open(suite) as fh:
         suite_def: dict = yaml.safe_load(fh)
 
@@ -257,7 +255,13 @@ def eval(suite: str, config: str, output: str) -> None:
 @click.option("--config", default="configs/app.yaml", show_default=True, help="Config file.")
 def download_models(config: str) -> None:
     """Downloads the GGUF LLM and PubMedBERT embeddings declared in the config."""
-    from scripts.download_models import download_llm, download_embeddings, _load_config as _dl_cfg
+    from scripts.download_models import (
+        _load_config as _dl_cfg,
+    )
+    from scripts.download_models import (
+        download_embeddings,
+        download_llm,
+    )
 
     cfg = _dl_cfg(config)
     download_llm(cfg)

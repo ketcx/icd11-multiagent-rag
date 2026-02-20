@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-import pytest
 from unittest.mock import MagicMock
 
 from core.agents.client import ClientAgent, _format_profile
-from core.agents.prompts import CLIENT_PROMPT_EN, CLIENT_PROMPT_ES
+from core.agents.prompts import CLIENT_PROMPT_EN
 
 
 def _make_client(llm_response: str = "I feel anxious.") -> ClientAgent:
@@ -130,8 +129,9 @@ class TestMockResponseVariety:
     """Validates that mock fallback responses vary by domain."""
 
     def test_mock_responses_differ_across_domains(self) -> None:
-        from core.orchestration.nodes import _mock_client_response
         import random
+
+        from core.orchestration.nodes import _mock_client_response
 
         random.seed(0)
         domains = ["mood", "anxiety", "sleep", "eating", "trauma", "cognition"]
@@ -140,8 +140,9 @@ class TestMockResponseVariety:
         assert len(set(responses.values())) == len(domains)
 
     def test_mock_therapist_questions_differ_across_domains(self) -> None:
-        from core.orchestration.nodes import _mock_therapist_question
         import random
+
+        from core.orchestration.nodes import _mock_therapist_question
 
         random.seed(0)
         domains = ["mood", "anxiety", "sleep", "eating", "trauma", "cognition"]

@@ -1,7 +1,7 @@
 """Builds/Updates the ChromaDB index from chunks."""
 
-from langchain_chroma import Chroma
 from langchain.schema import Document
+from langchain_chroma import Chroma
 
 COLLECTION_NAME = "icd11_es"
 PERSIST_DIR = "data/indexes/chroma"

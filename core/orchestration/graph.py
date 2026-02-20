@@ -1,20 +1,21 @@
 """Main LangGraph architecture for the multi-agent system."""
 
-from langgraph.graph import StateGraph, END
-from core.orchestration.state import SessionState
+from langgraph.graph import END, StateGraph
+
 from core.orchestration.nodes import (
-    init_session,
-    therapist_ask,
     client_respond,
-    human_input_node,
     coverage_check,
-    risk_check,
-    retrieve_context,
     diagnostician_draft,
     evidence_audit,
     finalize_session,
+    human_input_node,
+    init_session,
+    retrieve_context,
+    risk_check,
     safe_exit,
+    therapist_ask,
 )
+from core.orchestration.state import SessionState
 
 
 def build_graph(checkpointer=None) -> StateGraph:

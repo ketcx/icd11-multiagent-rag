@@ -1,6 +1,7 @@
 """Typed state definition for the LangGraph state machine."""
 
-from typing import TypedDict, Annotated
+from typing import Annotated, TypedDict
+
 from langgraph.graph.message import add_messages
 
 

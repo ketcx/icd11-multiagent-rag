@@ -43,9 +43,9 @@ def validate_pipeline():
             return False
 
         print("   ✅ RAG pipeline initialized")
-        print(f"   • Retriever: HybridRetriever (Dense + BM25)")
-        print(f"   • Query Builder: ChunkingStrategy")
-        print(f"   • Embedding: TF-IDF (lightweight, 384D)")
+        print("   • Retriever: HybridRetriever (Dense + BM25)")
+        print("   • Query Builder: ChunkingStrategy")
+        print("   • Embedding: TF-IDF (lightweight, 384D)")
 
         return True
 
@@ -81,16 +81,17 @@ def validate_graph():
     print("\n4️⃣ LANGGRAPH ORCHESTRATION")
 
     try:
-        from core.orchestration.graph import build_graph
         from langgraph.checkpoint.memory import MemorySaver
 
+        from core.orchestration.graph import build_graph
+
         memory = MemorySaver()
-        graph = build_graph(checkpointer=memory)
+        build_graph(checkpointer=memory)
 
         print("   ✅ LangGraph compiled successfully")
-        print(f"   • Checkpointer: MemorySaver (for interrupts)")
-        print(f"   • Nodes: init → therapist → risk_check → ... → finalize")
-        print(f"   • Interrupt: human_input (for interactive mode)")
+        print("   • Checkpointer: MemorySaver (for interrupts)")
+        print("   • Nodes: init → therapist → risk_check → ... → finalize")
+        print("   • Interrupt: human_input (for interactive mode)")
 
         return True
 
@@ -104,7 +105,6 @@ def validate_endpoints():
     print("\n5️⃣ IMPLEMENTATION CHECKLIST")
 
     from pathlib import Path
-    import os
 
     files_to_check = {
         "core/agents/therapist.py": "TherapistAgent",

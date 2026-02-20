@@ -1,7 +1,8 @@
 """FastAPI app — ICD-11 Multi-Agent RAG."""
 
 from fastapi import FastAPI
-from apps.api.routers import sessions, batch, health
+
+from apps.api.routers import batch, health, sessions
 
 app = FastAPI(
     title="ICD-11 Multi-Agent RAG",

@@ -1,11 +1,12 @@
 """Pydantic models for diagnostic output."""
 
-from pydantic import BaseModel, Field
-from enum import Enum
 from datetime import datetime
+from enum import StrEnum
+
+from pydantic import BaseModel, Field
 
 
-class ConfidenceBand(str, Enum):
+class ConfidenceBand(StrEnum):
     LOW = "LOW"  # Was "BAJA"
     MEDIUM = "MEDIUM"  # Was "MEDIA"
     HIGH = "HIGH"  # Was "ALTA"

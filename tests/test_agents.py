@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from core.agents.base import BaseAgent
 from core.agents.prompts import THERAPIST_PROMPT_EN
