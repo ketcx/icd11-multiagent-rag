@@ -37,6 +37,7 @@ class TestInitSession:
 
     def test_all_domains_present_after_shuffle(self, base_session_state: dict) -> None:
         from core.agents.therapist import TherapistAgent
+
         state = dict(base_session_state)
         state["domains_pending"] = []
         result = init_session(state)

@@ -6,6 +6,7 @@ from langchain.schema import Document
 COLLECTION_NAME = "icd11_es"
 PERSIST_DIR = "data/indexes/chroma"
 
+
 def build_index(chunks: list[dict], embedding_model_name: str, device: str = "mps") -> Chroma:
     """Builds ChromaDB from processed chunks.
 
@@ -19,6 +20,7 @@ def build_index(chunks: list[dict], embedding_model_name: str, device: str = "mp
     """
     # Initialize embeddings
     from langchain_community.embeddings import HuggingFaceEmbeddings
+
     embeddings = HuggingFaceEmbeddings(
         model_name=embedding_model_name,
         model_kwargs={"device": device},
@@ -26,10 +28,7 @@ def build_index(chunks: list[dict], embedding_model_name: str, device: str = "mp
     )
 
     # Create LangChain documents
-    documents = [
-        Document(page_content=c["content"], metadata=c["metadata"] or {})
-        for c in chunks
-    ]
+    documents = [Document(page_content=c["content"], metadata=c["metadata"] or {}) for c in chunks]
 
     # Build and persist
     vectorstore = Chroma.from_documents(

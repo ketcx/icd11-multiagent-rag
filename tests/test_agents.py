@@ -40,9 +40,7 @@ class TestBaseAgentGenerate:
 
     def test_system_prompt_prepended(self) -> None:
         mock_llm = MagicMock()
-        mock_llm.create_chat_completion.return_value = {
-            "choices": [{"message": {"content": "ok"}}]
-        }
+        mock_llm.create_chat_completion.return_value = {"choices": [{"message": {"content": "ok"}}]}
         agent = _ConcreteAgent(llm=mock_llm, system_prompt="MY_SYSTEM_PROMPT")
         agent._generate([{"role": "user", "content": "Hi"}])
 
@@ -77,9 +75,7 @@ class TestBaseAgentGenerate:
 
     def test_temperature_passed_to_llm(self) -> None:
         mock_llm = MagicMock()
-        mock_llm.create_chat_completion.return_value = {
-            "choices": [{"message": {"content": "ok"}}]
-        }
+        mock_llm.create_chat_completion.return_value = {"choices": [{"message": {"content": "ok"}}]}
         agent = _ConcreteAgent(llm=mock_llm, system_prompt=THERAPIST_PROMPT_EN, temperature=0.42)
         agent._generate([{"role": "user", "content": "Hi"}])
         call_kwargs = mock_llm.create_chat_completion.call_args.kwargs
@@ -87,9 +83,7 @@ class TestBaseAgentGenerate:
 
     def test_max_tokens_passed_to_llm(self) -> None:
         mock_llm = MagicMock()
-        mock_llm.create_chat_completion.return_value = {
-            "choices": [{"message": {"content": "ok"}}]
-        }
+        mock_llm.create_chat_completion.return_value = {"choices": [{"message": {"content": "ok"}}]}
         agent = _ConcreteAgent(llm=mock_llm, system_prompt=THERAPIST_PROMPT_EN, max_tokens=128)
         agent._generate([{"role": "user", "content": "Hi"}])
         call_kwargs = mock_llm.create_chat_completion.call_args.kwargs

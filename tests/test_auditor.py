@@ -57,9 +57,7 @@ def state_with_ungrounded_evidence() -> dict:
         "transcript": [
             {"role": "client", "content": "I feel tired."},
         ],
-        "retrieved_chunks": [
-            {"content": "Some ICD-11 context", "metadata": {}}
-        ],
+        "retrieved_chunks": [{"content": "Some ICD-11 context", "metadata": {}}],
         "hypotheses": [
             {
                 "label": "Bipolar Disorder",
@@ -92,7 +90,9 @@ class TestEvidenceAuditor:
         report = result["audit_report"]
         assert report["traceability_score"] > 0.0
 
-    def test_ungrounded_evidence_produces_issues(self, state_with_ungrounded_evidence: dict) -> None:
+    def test_ungrounded_evidence_produces_issues(
+        self, state_with_ungrounded_evidence: dict
+    ) -> None:
         auditor = _make_auditor()
         result = auditor.act(state_with_ungrounded_evidence)
         report = result["audit_report"]

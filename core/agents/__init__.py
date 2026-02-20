@@ -41,12 +41,14 @@ def create_llm(
         )
     except ImportError:
         import logging
+
         logging.getLogger(__name__).warning(
             "llama-cpp-python is not installed — running in mock mode."
         )
         return None
     except Exception as exc:
         import logging
+
         logging.getLogger(__name__).warning(
             "Failed to load LLM from %s: %s — running in mock mode.", model_path, exc
         )

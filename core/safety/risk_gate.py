@@ -4,9 +4,15 @@ import re
 
 # Keywords triggering the RiskGate (Spanish and English)
 RISK_KEYWORDS = [
-    r"suicid", r"matarme", r"quitarme la vida", r"autolesion",
-    r"hacerme daño", r"no quiero vivir", r"cortarme",
-    r"self\.harm", r"kill myself",
+    r"suicid",
+    r"matarme",
+    r"quitarme la vida",
+    r"autolesion",
+    r"hacerme daño",
+    r"no quiero vivir",
+    r"cortarme",
+    r"self\.harm",
+    r"kill myself",
 ]
 
 # Educational system Spanish disclaimer string response
@@ -22,6 +28,7 @@ Si tú o alguien que conoces necesita ayuda inmediata:
 
 Esta sesión se ha pausado por seguridad.
 """
+
 
 class RiskGate:
     """Intercepts sensitive content across all graph nodes."""

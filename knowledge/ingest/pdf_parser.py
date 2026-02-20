@@ -4,7 +4,9 @@ import fitz  # type: ignore # PyMuPDF
 import re
 from pathlib import Path
 from typing import Generator
+
 # from core.schemas.session import DocumentChunk # Will be defined later
+
 
 def _extract_headings(blocks: list[dict]) -> list[str]:
     # Placeholder for actual heading detection logic
@@ -13,14 +15,16 @@ def _extract_headings(blocks: list[dict]) -> list[str]:
         if "lines" in block:
             for line in block["lines"]:
                 for span in line.get("spans", []):
-                    if span.get("size", 0) > 12: # Example threshold
+                    if span.get("size", 0) > 12:  # Example threshold
                         headings.append(span["text"].strip())
     return headings
+
 
 def _extract_cie11_codes(text: str) -> list[str]:
     # Detect ICD-11 codes (regex: \d[A-Z]\d{2}(\.\d+)?)
     pattern = r"\d[A-Z]\d{2}(?:\.\d+)?"
     return re.findall(pattern, text)
+
 
 def extract_pages(pdf_path: Path) -> Generator[dict, None, None]:
     """Extracts text page by page with metadata.

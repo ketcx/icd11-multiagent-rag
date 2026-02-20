@@ -46,23 +46,30 @@ class TestDiagnosticianJSONParsing:
     """Exercises the JSON extraction logic in DiagnosticianAgent.act()."""
 
     def test_plain_json_array(self, minimal_state: dict) -> None:
-        raw = json.dumps([
-            {"label": "GAD", "code": "6B00", "confidence": "HIGH",
-             "evidence_for": ["anxious"], "evidence_against": []}
-        ])
+        raw = json.dumps(
+            [
+                {
+                    "label": "GAD",
+                    "code": "6B00",
+                    "confidence": "HIGH",
+                    "evidence_for": ["anxious"],
+                    "evidence_against": [],
+                }
+            ]
+        )
         agent = _make_agent(raw)
         result = agent.act(dict(minimal_state))
         assert isinstance(result["hypotheses"], list)
         assert result["hypotheses"][0]["code"] == "6B00"
 
     def test_json_in_code_fence(self, minimal_state: dict) -> None:
-        raw = "```json\n[{\"label\": \"GAD\", \"code\": \"6B00\", \"confidence\": \"MEDIUM\", \"evidence_for\": [], \"evidence_against\": []}]\n```"
+        raw = '```json\n[{"label": "GAD", "code": "6B00", "confidence": "MEDIUM", "evidence_for": [], "evidence_against": []}]\n```'
         agent = _make_agent(raw)
         result = agent.act(dict(minimal_state))
         assert result["hypotheses"][0]["confidence"] == "MEDIUM"
 
     def test_json_in_plain_code_fence(self, minimal_state: dict) -> None:
-        raw = "```\n[{\"label\": \"GAD\", \"code\": \"6B00\", \"confidence\": \"LOW\", \"evidence_for\": [], \"evidence_against\": []}]\n```"
+        raw = '```\n[{"label": "GAD", "code": "6B00", "confidence": "LOW", "evidence_for": [], "evidence_against": []}]\n```'
         agent = _make_agent(raw)
         result = agent.act(dict(minimal_state))
         assert result["hypotheses"][0]["confidence"] == "LOW"
@@ -97,8 +104,13 @@ class TestDiagnosticianJSONParsing:
 
     def test_single_object_wrapped_in_list(self, minimal_state: dict) -> None:
         raw = json.dumps(
-            {"label": "GAD", "code": "6B00", "confidence": "HIGH",
-             "evidence_for": [], "evidence_against": []}
+            {
+                "label": "GAD",
+                "code": "6B00",
+                "confidence": "HIGH",
+                "evidence_for": [],
+                "evidence_against": [],
+            }
         )
         agent = _make_agent(raw)
         result = agent.act(dict(minimal_state))
@@ -108,10 +120,17 @@ class TestDiagnosticianJSONParsing:
     def test_language_spanish(self, minimal_state: dict) -> None:
         state = dict(minimal_state)
         state["language"] = "Español"
-        raw = json.dumps([
-            {"label": "TAG", "code": "6B00", "confidence": "ALTA",
-             "evidence_for": ["ansiedad"], "evidence_against": []}
-        ])
+        raw = json.dumps(
+            [
+                {
+                    "label": "TAG",
+                    "code": "6B00",
+                    "confidence": "ALTA",
+                    "evidence_for": ["ansiedad"],
+                    "evidence_against": [],
+                }
+            ]
+        )
         agent = _make_agent(raw)
         result = agent.act(state)
         assert result["hypotheses"][0]["label"] == "TAG"

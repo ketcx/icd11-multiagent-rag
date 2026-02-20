@@ -37,16 +37,34 @@ def _make_retriever(dense_docs: list, bm25_corpus: list) -> HybridRetriever:
 
 
 BM25_CORPUS = [
-    {"content": "Depressive Episode ICD-11 6A70 persistent low mood loss of interest", "metadata": {"code": "6A70"}},
-    {"content": "Anxiety Disorder ICD-11 6B00 excessive worry fear daily functioning", "metadata": {"code": "6B00"}},
-    {"content": "Insomnia Disorder ICD-11 7A00 difficulty initiating maintaining sleep", "metadata": {"code": "7A00"}},
-    {"content": "Post Traumatic Stress Disorder ICD-11 6B40 trauma exposure intrusion avoidance", "metadata": {"code": "6B40"}},
+    {
+        "content": "Depressive Episode ICD-11 6A70 persistent low mood loss of interest",
+        "metadata": {"code": "6A70"},
+    },
+    {
+        "content": "Anxiety Disorder ICD-11 6B00 excessive worry fear daily functioning",
+        "metadata": {"code": "6B00"},
+    },
+    {
+        "content": "Insomnia Disorder ICD-11 7A00 difficulty initiating maintaining sleep",
+        "metadata": {"code": "7A00"},
+    },
+    {
+        "content": "Post Traumatic Stress Disorder ICD-11 6B40 trauma exposure intrusion avoidance",
+        "metadata": {"code": "6B40"},
+    },
 ]
 
 
 DENSE_DOCS = [
-    {"content": "Anxiety Disorder ICD-11 6B00 excessive worry fear daily functioning", "code": "6B00"},
-    {"content": "Depressive Episode ICD-11 6A70 persistent low mood loss of interest", "code": "6A70"},
+    {
+        "content": "Anxiety Disorder ICD-11 6B00 excessive worry fear daily functioning",
+        "code": "6B00",
+    },
+    {
+        "content": "Depressive Episode ICD-11 6A70 persistent low mood loss of interest",
+        "code": "6A70",
+    },
     {"content": "General background text without a specific code", "code": None},
 ]
 

@@ -91,6 +91,7 @@ def ingest(pdf: str, config: str) -> None:
 def run(profile: str, config: str, language: str | None, seed: int) -> None:
     """Executes a full automated session and writes the result to runs/."""
     import random
+
     random.seed(seed)
 
     cfg = _load_config(config)
@@ -109,7 +110,9 @@ def run(profile: str, config: str, language: str | None, seed: int) -> None:
     import uuid
     from datetime import datetime, timezone
 
-    session_id = f"sess_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
+    session_id = (
+        f"sess_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
+    )
 
     initial_state: SessionState = {
         "session_id": session_id,
@@ -187,8 +190,15 @@ def serve(config: str, host: str | None, port: int | None) -> None:
     # Launch Streamlit in a background thread
     def _run_streamlit() -> None:
         subprocess.run(
-            [sys.executable, "-m", "streamlit", "run", "apps/ui/app.py",
-             "--server.headless", "true"],
+            [
+                sys.executable,
+                "-m",
+                "streamlit",
+                "run",
+                "apps/ui/app.py",
+                "--server.headless",
+                "true",
+            ],
             check=False,
         )
 
@@ -207,7 +217,9 @@ def serve(config: str, host: str | None, port: int | None) -> None:
 @cli.command()
 @click.option("--suite", required=True, type=click.Path(exists=True), help="Evaluation suite YAML.")
 @click.option("--config", default="configs/app.yaml", show_default=True, help="Config file.")
-@click.option("--output", default="runs/eval_report.json", show_default=True, help="Report output path.")
+@click.option(
+    "--output", default="runs/eval_report.json", show_default=True, help="Report output path."
+)
 def eval(suite: str, config: str, output: str) -> None:
     """Runs an evaluation suite and writes a JSON report."""
     cfg = _load_config(config)
@@ -223,6 +235,7 @@ def eval(suite: str, config: str, output: str) -> None:
     for profile_path in profiles:
         click.echo(f"  Running profile: {profile_path} …")
         from click.testing import CliRunner
+
         runner = CliRunner()
         result = runner.invoke(run, ["--profile", profile_path, "--config", config])
         results.append({"profile": profile_path, "exit_code": result.exit_code})
