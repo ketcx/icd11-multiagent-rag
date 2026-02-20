@@ -12,26 +12,25 @@ import yaml
 from core.orchestration.graph import build_graph
 from core.orchestration.nodes import AGENTS
 
-
 # ---------------------------------------------------------------------------
 # Internationalisation (i18n)
 # ---------------------------------------------------------------------------
 
 _STRINGS: dict[str, dict[str, str]] = {
     # Sidebar
-    "sidebar_header":         {"en": "⚙️ Configuration",          "es": "⚙️ Configuración"},
-    "llm_loaded":             {"en": "✅ Model loaded",            "es": "✅ Modelo cargado"},
-    "llm_mock":               {"en": "⚠️ No model (mock mode)",   "es": "⚠️ Sin modelo (modo mock)"},
-    "language_label":         {"en": "Language / Idioma",          "es": "Idioma / Language"},
-    "mode_label":             {"en": "Patient Mode",               "es": "Modo de Paciente"},
-    "mode_auto":              {"en": "Auto (Simulated Profile)",    "es": "Auto (Perfil Simulado)"},
-    "mode_interactive":       {"en": "Interactive (Human)",         "es": "Interactivo (Humano)"},
-    "max_turns_caption":      {"en": "max turns",                   "es": "turnos máx."},
-    "domains_caption":        {"en": "domains",                     "es": "dominios"},
-    "new_session_btn":        {"en": "🔄 New Session",              "es": "🔄 Nueva Sesión"},
+    "sidebar_header": {"en": "⚙️ Configuration", "es": "⚙️ Configuración"},
+    "llm_loaded": {"en": "✅ Model loaded", "es": "✅ Modelo cargado"},
+    "llm_mock": {"en": "⚠️ No model (mock mode)", "es": "⚠️ Sin modelo (modo mock)"},
+    "language_label": {"en": "Language / Idioma", "es": "Idioma / Language"},
+    "mode_label": {"en": "Patient Mode", "es": "Modo de Paciente"},
+    "mode_auto": {"en": "Auto (Simulated Profile)", "es": "Auto (Perfil Simulado)"},
+    "mode_interactive": {"en": "Interactive (Human)", "es": "Interactivo (Humano)"},
+    "max_turns_caption": {"en": "max turns", "es": "turnos máx."},
+    "domains_caption": {"en": "domains", "es": "dominios"},
+    "new_session_btn": {"en": "🔄 New Session", "es": "🔄 Nueva Sesión"},
     # Page title / header
-    "page_title":             {"en": "ICD-11 Multi-Agent RAG",      "es": "ICD-11 Multi-Agent RAG"},
-    "page_subtitle":          {
+    "page_title": {"en": "ICD-11 Multi-Agent RAG", "es": "ICD-11 Multi-Agent RAG"},
+    "page_subtitle": {
         "en": "Educational clinical interview simulator",
         "es": "Simulador educativo de entrevista clínica",
     },
@@ -48,35 +47,47 @@ _STRINGS: dict[str, dict[str, str]] = {
         ),
     },
     # Session control
-    "btn_start_interactive":  {"en": "▶️ Start Interactive Interview",    "es": "▶️ Iniciar Entrevista Interactiva"},
-    "btn_start_auto":         {"en": "▶️ Start Automatic Simulation",     "es": "▶️ Iniciar Simulación Automática"},
-    "spinner_init":           {"en": "Initialising session…",             "es": "Inicializando sesión…"},
-    "spinner_thinking":       {"en": "Therapist is thinking…",            "es": "El terapeuta está pensando…"},
-    "spinner_simulating":     {"en": "Simulating next turn…",             "es": "Simulando siguiente turno…"},
-    "chat_placeholder":       {"en": "Type your response here…",          "es": "Escribe tu respuesta aquí…"},
+    "btn_start_interactive": {
+        "en": "▶️ Start Interactive Interview",
+        "es": "▶️ Iniciar Entrevista Interactiva",
+    },
+    "btn_start_auto": {
+        "en": "▶️ Start Automatic Simulation",
+        "es": "▶️ Iniciar Simulación Automática",
+    },
+    "spinner_init": {"en": "Initialising session…", "es": "Inicializando sesión…"},
+    "spinner_thinking": {"en": "Therapist is thinking…", "es": "El terapeuta está pensando…"},
+    "spinner_simulating": {"en": "Simulating next turn…", "es": "Simulando siguiente turno…"},
+    "chat_placeholder": {"en": "Type your response here…", "es": "Escribe tu respuesta aquí…"},
     # Progress info
-    "progress_info":          {
+    "progress_info": {
         "en": "Turn {turn}/{max} · Pending domains: {pending} · Covered: {covered}",
         "es": "Turno {turn}/{max} · Dominios pendientes: {pending} · Cubiertos: {covered}",
     },
     # Results
-    "session_complete":       {"en": "✅ Session complete",               "es": "✅ Sesión completada"},
-    "risk_terminated":        {"en": "Session terminated by safety gate.", "es": "Sesión terminada por la puerta de seguridad."},
-    "hypotheses_header":      {"en": "Diagnostic Hypotheses",             "es": "Hipótesis Diagnósticas"},
-    "no_hypotheses":          {"en": "No hypotheses generated.",           "es": "Sin hipótesis generadas."},
-    "confidence_label":       {"en": "Confidence",                        "es": "Confianza"},
-    "evidence_for_label":     {"en": "Supporting evidence",               "es": "Evidencia a favor"},
-    "evidence_against_label": {"en": "Contradicting evidence",            "es": "Evidencia en contra"},
-    "audit_header":           {"en": "Evidence Audit",                    "es": "Auditoría de Evidencia"},
-    "traceability_metric":    {"en": "Traceability score",                "es": "Puntuación de trazabilidad"},
-    "issues_warning":         {"en": "{n} claim(s) without direct grounding", "es": "{n} afirmación(es) sin respaldo directo"},
-    "no_issues":              {"en": "All claims traceable",              "es": "Todas las afirmaciones trazables"},
-    "auditor_comment":        {"en": "Auditor commentary",                "es": "Comentario del auditor"},
-    "full_transcript":        {"en": "Full Transcript",                   "es": "Transcripción Completa"},
-    "view_transcript":        {"en": "View transcript",                   "es": "Ver transcripción"},
-    "domain_caption":         {"en": "domain",                           "es": "dominio"},
+    "session_complete": {"en": "✅ Session complete", "es": "✅ Sesión completada"},
+    "risk_terminated": {
+        "en": "Session terminated by safety gate.",
+        "es": "Sesión terminada por la puerta de seguridad.",
+    },
+    "hypotheses_header": {"en": "Diagnostic Hypotheses", "es": "Hipótesis Diagnósticas"},
+    "no_hypotheses": {"en": "No hypotheses generated.", "es": "Sin hipótesis generadas."},
+    "confidence_label": {"en": "Confidence", "es": "Confianza"},
+    "evidence_for_label": {"en": "Supporting evidence", "es": "Evidencia a favor"},
+    "evidence_against_label": {"en": "Contradicting evidence", "es": "Evidencia en contra"},
+    "audit_header": {"en": "Evidence Audit", "es": "Auditoría de Evidencia"},
+    "traceability_metric": {"en": "Traceability score", "es": "Puntuación de trazabilidad"},
+    "issues_warning": {
+        "en": "{n} claim(s) without direct grounding",
+        "es": "{n} afirmación(es) sin respaldo directo",
+    },
+    "no_issues": {"en": "All claims traceable", "es": "Todas las afirmaciones trazables"},
+    "auditor_comment": {"en": "Auditor commentary", "es": "Comentario del auditor"},
+    "full_transcript": {"en": "Full Transcript", "es": "Transcripción Completa"},
+    "view_transcript": {"en": "View transcript", "es": "Ver transcripción"},
+    "domain_caption": {"en": "domain", "es": "dominio"},
     # Model loading spinner (must be a static string for @st.cache_resource)
-    "spinner_loading_model":  {"en": "Loading LLM into memory…",         "es": "Cargando modelo LLM…"},
+    "spinner_loading_model": {"en": "Loading LLM into memory…", "es": "Cargando modelo LLM…"},
 }
 
 
@@ -122,16 +133,16 @@ def load_agents() -> tuple[dict, str, bool]:
     """
     cfg = _load_config()
     from core.agents import create_llm
-    from core.agents.therapist import TherapistAgent
+    from core.agents.auditor import EvidenceAuditorAgent
     from core.agents.client import ClientAgent
     from core.agents.diagnostician import DiagnosticianAgent
-    from core.agents.auditor import EvidenceAuditorAgent
     from core.agents.prompts import (
-        get_therapist_prompt,
+        get_auditor_prompt,
         get_client_prompt,
         get_diagnostician_prompt,
-        get_auditor_prompt,
+        get_therapist_prompt,
     )
+    from core.agents.therapist import TherapistAgent
     from core.retrieval import init_rag_pipeline
 
     llm = None
@@ -212,11 +223,10 @@ def _init_app_state() -> None:
 
     if "graph" not in st.session_state:
         from langgraph.checkpoint.memory import MemorySaver
+
         memory = MemorySaver()
         st.session_state.graph = build_graph(checkpointer=memory)
-        st.session_state.config = {
-            "configurable": {"thread_id": st.session_state.session_id}
-        }
+        st.session_state.config = {"configurable": {"thread_id": st.session_state.session_id}}
 
     st.session_state.setdefault("patient_mode", "Auto (Simulated Profile)")
     st.session_state.setdefault("session_language", "English")
@@ -231,7 +241,7 @@ def _build_initial_state(language: str, interactive: bool, cfg: dict) -> dict:
         "transcript": [],
         "messages": [],
         "domains_covered": [],
-        "domains_pending": [],      # init_session will shuffle and populate
+        "domains_pending": [],  # init_session will shuffle and populate
         "coverage_complete": False,
         "retrieved_chunks": [],
         "query_history": [],
@@ -365,6 +375,7 @@ def _confidence_icon(confidence: str) -> str:
 def _render_results(state: dict) -> None:
     if state.get("risk_detected"):
         from core.safety.risk_gate import RiskGate
+
         st.error(t("risk_terminated"))
         st.markdown(RiskGate().get_safe_response(state.get("risk_type", "")))
         return
@@ -466,11 +477,13 @@ def main() -> None:
         user_input = st.chat_input(t("chat_placeholder"))
         if user_input:
             updated_transcript = list(current_state.get("transcript", []))
-            updated_transcript.append({
-                "role": "client",
-                "content": user_input,
-                "turn_id": len(updated_transcript),
-            })
+            updated_transcript.append(
+                {
+                    "role": "client",
+                    "content": user_input,
+                    "turn_id": len(updated_transcript),
+                }
+            )
             st.session_state.graph.update_state(
                 st.session_state.config,
                 {"transcript": updated_transcript, "current_step": "human_input"},

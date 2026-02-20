@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-import pytest
 from unittest.mock import MagicMock
 
 from core.agents.client import ClientAgent, _format_profile
-from core.agents.prompts import CLIENT_PROMPT_EN, CLIENT_PROMPT_ES
+from core.agents.prompts import CLIENT_PROMPT_EN
 
 
 def _make_client(llm_response: str = "I feel anxious.") -> ClientAgent:
@@ -26,7 +25,12 @@ SAMPLE_PROFILE = {
 }
 
 SAMPLE_TRANSCRIPT = [
-    {"role": "therapist", "content": "How has your sleep been lately?", "domain": "sleep", "turn_id": 0},
+    {
+        "role": "therapist",
+        "content": "How has your sleep been lately?",
+        "domain": "sleep",
+        "turn_id": 0,
+    },
 ]
 
 
@@ -125,8 +129,10 @@ class TestMockResponseVariety:
     """Validates that mock fallback responses vary by domain."""
 
     def test_mock_responses_differ_across_domains(self) -> None:
-        from core.orchestration.nodes import _mock_client_response
         import random
+
+        from core.orchestration.nodes import _mock_client_response
+
         random.seed(0)
         domains = ["mood", "anxiety", "sleep", "eating", "trauma", "cognition"]
         responses = {d: _mock_client_response(d, "Español") for d in domains}
@@ -134,8 +140,10 @@ class TestMockResponseVariety:
         assert len(set(responses.values())) == len(domains)
 
     def test_mock_therapist_questions_differ_across_domains(self) -> None:
-        from core.orchestration.nodes import _mock_therapist_question
         import random
+
+        from core.orchestration.nodes import _mock_therapist_question
+
         random.seed(0)
         domains = ["mood", "anxiety", "sleep", "eating", "trauma", "cognition"]
         questions = {d: _mock_therapist_question(d, "English") for d in domains}
@@ -144,6 +152,7 @@ class TestMockResponseVariety:
     def test_same_domain_can_return_different_responses(self) -> None:
         """Multiple calls for the same domain may return different options."""
         from core.orchestration.nodes import _mock_client_response
+
         # Collect all unique responses for 'mood' over many calls
         responses = {_mock_client_response("mood", "Español") for _ in range(50)}
         # The bank has 3 options for mood — at least 2 should appear in 50 draws

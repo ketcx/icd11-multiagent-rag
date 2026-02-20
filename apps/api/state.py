@@ -9,7 +9,6 @@ use (development, demos) the in-memory dict is sufficient.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
 
 
 @dataclass

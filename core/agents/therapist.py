@@ -2,14 +2,23 @@
 
 from core.agents.base import BaseAgent
 
+
 class TherapistAgent(BaseAgent):
     """Explores clinical domains empathetically without diagnosing."""
-    
+
     # Target domains to evaluate
     DOMAINS = [
-        "mood", "anxiety", "sleep", "eating", "substances",
-        "psychosis", "trauma", "ocd", "cognition",
-        "social_functioning", "suicidal_ideation"
+        "mood",
+        "anxiety",
+        "sleep",
+        "eating",
+        "substances",
+        "psychosis",
+        "trauma",
+        "ocd",
+        "cognition",
+        "social_functioning",
+        "suicidal_ideation",
     ]
 
     def act(self, state: dict) -> dict:
@@ -37,33 +46,39 @@ class TherapistAgent(BaseAgent):
 
         next_domain = pending[0]
         language = state.get("language", "Español")
-        
+
         # Build prompt adding history + target domain logic
         messages = self._build_messages(state["transcript"], next_domain, language)
         response = self._generate(messages)
 
         # Update transcript
-        state["transcript"].append({
-            "role": "therapist",
-            "content": response,
-            "domain": next_domain,
-            "turn_id": len(state["transcript"]),
-        })
-        
+        state["transcript"].append(
+            {
+                "role": "therapist",
+                "content": response,
+                "domain": next_domain,
+                "turn_id": len(state["transcript"]),
+            }
+        )
+
         # Explicitly set the pending domains for external tracking
         state["domains_pending"] = pending
-        
+
         return state
 
-    def _build_messages(self, transcript: list[dict], target_domain: str, language: str) -> list[dict]:
+    def _build_messages(
+        self, transcript: list[dict], target_domain: str, language: str
+    ) -> list[dict]:
         """Constructs the message payload for the LLM."""
         messages = []
         for turn in transcript:
             role = "assistant" if turn["role"] == "therapist" else "user"
             messages.append({"role": role, "content": turn["content"]})
-            
+
         # Add instruction for current turn
         instruction = f"Now, gently explore the following domain: {target_domain}. Ask ONE open-ended question. Reply in {language}."
-        messages.append({"role": "user", "content": instruction}) # As system prompt injected by user role or system depending on model strategy
-        
+        messages.append(
+            {"role": "user", "content": instruction}
+        )  # As system prompt injected by user role or system depending on model strategy
+
         return messages

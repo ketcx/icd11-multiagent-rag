@@ -304,12 +304,14 @@ def therapist_ask(state: SessionState) -> dict:
 
     content = _mock_therapist_question(domain, language)
 
-    transcript.append({
-        "role": "therapist",
-        "content": content,
-        "domain": domain,
-        "turn_id": len(transcript),
-    })
+    transcript.append(
+        {
+            "role": "therapist",
+            "content": content,
+            "domain": domain,
+            "turn_id": len(transcript),
+        }
+    )
     return {
         "transcript": transcript,
         "turn_count": turn_count + 1,
@@ -331,11 +333,13 @@ def client_respond(state: SessionState) -> dict:
 
     content = _mock_client_response(domain, language)
 
-    transcript.append({
-        "role": "client",
-        "content": content,
-        "turn_id": len(transcript),
-    })
+    transcript.append(
+        {
+            "role": "client",
+            "content": content,
+            "turn_id": len(transcript),
+        }
+    )
     return {
         "transcript": transcript,
         "current_step": "client_respond",
@@ -418,21 +422,25 @@ def retrieve_context(state: SessionState) -> dict:
             if queries.get("semantic"):
                 semantic_chunks = rag_pipeline["retriever"].retrieve(queries["semantic"])
                 retrieved_chunks.extend(semantic_chunks)
-                query_history.append({
-                    "type": "semantic",
-                    "query": queries["semantic"],
-                    "results": len(semantic_chunks),
-                })
+                query_history.append(
+                    {
+                        "type": "semantic",
+                        "query": queries["semantic"],
+                        "results": len(semantic_chunks),
+                    }
+                )
 
             if queries.get("exact"):
                 for exact_query in queries["exact"]:
                     exact_chunks = rag_pipeline["retriever"].retrieve(exact_query)
                     retrieved_chunks.extend(exact_chunks)
-                query_history.append({
-                    "type": "exact",
-                    "queries": queries["exact"],
-                    "total_results": len(retrieved_chunks),
-                })
+                query_history.append(
+                    {
+                        "type": "exact",
+                        "queries": queries["exact"],
+                        "total_results": len(retrieved_chunks),
+                    }
+                )
 
             # Dedup by content
             seen: set[str] = set()
@@ -446,7 +454,10 @@ def retrieve_context(state: SessionState) -> dict:
 
         except Exception as exc:
             import logging
-            logging.getLogger(__name__).warning("RAG retrieval failed: %s — using mock context.", exc)
+
+            logging.getLogger(__name__).warning(
+                "RAG retrieval failed: %s — using mock context.", exc
+            )
 
     # Fallback mock chunks when RAG is unavailable
     if not retrieved_chunks:
@@ -498,24 +509,28 @@ def diagnostician_draft(state: SessionState) -> dict:
         label = "Trastorno de Ansiedad Generalizada (simulado)"
         code = "6B00"
         evidence = [d for d in domains_covered if d in ("anxiety", "sleep", "mood")]
-        hypotheses = [{
-            "label": label,
-            "code": code,
-            "confidence": "MEDIA" if len(evidence) < 2 else "ALTA",
-            "evidence_for": evidence or ["síntomas reportados en la entrevista"],
-            "evidence_against": [],
-        }]
+        hypotheses = [
+            {
+                "label": label,
+                "code": code,
+                "confidence": "MEDIA" if len(evidence) < 2 else "ALTA",
+                "evidence_for": evidence or ["síntomas reportados en la entrevista"],
+                "evidence_against": [],
+            }
+        ]
     else:
         label = "Generalised Anxiety Disorder (simulated)"
         code = "6B00"
         evidence = [d for d in domains_covered if d in ("anxiety", "sleep", "mood")]
-        hypotheses = [{
-            "label": label,
-            "code": code,
-            "confidence": "MEDIUM" if len(evidence) < 2 else "HIGH",
-            "evidence_for": evidence or ["symptoms reported in the interview"],
-            "evidence_against": [],
-        }]
+        hypotheses = [
+            {
+                "label": label,
+                "code": code,
+                "confidence": "MEDIUM" if len(evidence) < 2 else "HIGH",
+                "evidence_for": evidence or ["symptoms reported in the interview"],
+                "evidence_against": [],
+            }
+        ]
 
     return {
         "hypotheses": hypotheses,

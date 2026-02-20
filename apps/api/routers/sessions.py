@@ -12,7 +12,7 @@ POST /sessions/{id}/finalize   → force diagnosis + finalise
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
@@ -66,7 +66,9 @@ def create_session(body: CreateSessionRequest) -> dict:
     """
     from core.orchestration.nodes import init_session
 
-    session_id = f"sess_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
+    session_id = (
+        f"sess_{datetime.now(datetime.UTC).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
+    )
 
     initial_state: dict = {
         "session_id": session_id,
@@ -124,7 +126,10 @@ def execute_turn(session_id: str, body: TurnRequest) -> dict:
         )
 
     from core.orchestration.nodes import (
-        therapist_ask, client_respond, coverage_check, risk_check
+        client_respond,
+        coverage_check,
+        risk_check,
+        therapist_ask,
     )
 
     # Therapist asks
@@ -135,6 +140,7 @@ def execute_turn(session_id: str, body: TurnRequest) -> dict:
     if state["risk_detected"]:
         app_state.sessions[session_id] = state
         from core.safety.risk_gate import RiskGate
+
         gate = RiskGate()
         return {
             "risk_detected": True,
@@ -148,11 +154,13 @@ def execute_turn(session_id: str, body: TurnRequest) -> dict:
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="human_input is required in interactive_mode.",
             )
-        state["transcript"].append({
-            "role": "client",
-            "content": body.human_input,
-            "turn_id": len(state["transcript"]),
-        })
+        state["transcript"].append(
+            {
+                "role": "client",
+                "content": body.human_input,
+                "turn_id": len(state["transcript"]),
+            }
+        )
         state["turn_count"] = state.get("turn_count", 0) + 1
     else:
         state.update(client_respond(state))
@@ -162,6 +170,7 @@ def execute_turn(session_id: str, body: TurnRequest) -> dict:
     if state["risk_detected"]:
         app_state.sessions[session_id] = state
         from core.safety.risk_gate import RiskGate
+
         gate = RiskGate()
         return {
             "risk_detected": True,
@@ -172,7 +181,9 @@ def execute_turn(session_id: str, body: TurnRequest) -> dict:
     state.update(coverage_check(state))
     app_state.sessions[session_id] = state
 
-    latest_turns = state["transcript"][-2:] if len(state["transcript"]) >= 2 else state["transcript"]
+    latest_turns = (
+        state["transcript"][-2:] if len(state["transcript"]) >= 2 else state["transcript"]
+    )
     return {
         "turn_count": state["turn_count"],
         "coverage_complete": state["coverage_complete"],
@@ -197,7 +208,11 @@ def finalize_session_endpoint(session_id: str) -> dict:
             detail="Session is already finalised.",
         )
 
-    from core.orchestration.nodes import retrieve_context, diagnostician_draft, evidence_audit
+    from core.orchestration.nodes import (
+        diagnostician_draft,
+        evidence_audit,
+        retrieve_context,
+    )
 
     state.update(retrieve_context(state))
     state.update(diagnostician_draft(state))

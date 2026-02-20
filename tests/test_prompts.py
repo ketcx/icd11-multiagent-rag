@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from core.agents.prompts import (
-    get_therapist_prompt,
+    THERAPIST_PROMPT,  # backward-compat alias
+    get_auditor_prompt,
     get_client_prompt,
     get_diagnostician_prompt,
-    get_auditor_prompt,
-    THERAPIST_PROMPT,  # backward-compat alias
+    get_therapist_prompt,
 )
 
 

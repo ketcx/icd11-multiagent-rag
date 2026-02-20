@@ -28,17 +28,17 @@ class ClientAgent(BaseAgent):
         messages = self._build_messages(state["transcript"], profile, language)
         response = self._generate(messages)
 
-        state["transcript"].append({
-            "role": "client",
-            "content": response,
-            "turn_id": len(state["transcript"]),
-        })
+        state["transcript"].append(
+            {
+                "role": "client",
+                "content": response,
+                "turn_id": len(state["transcript"]),
+            }
+        )
 
         return state
 
-    def _build_messages(
-        self, transcript: list[dict], profile: dict, language: str
-    ) -> list[dict]:
+    def _build_messages(self, transcript: list[dict], profile: dict, language: str) -> list[dict]:
         """Builds the message payload for the LLM.
 
         Injects the client profile as an opening exchange so the model can
