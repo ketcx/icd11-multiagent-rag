@@ -37,16 +37,16 @@ chunking:
 agents:
   therapist:
     temperature: 0.7
-    max_tokens: 256
+    max_tokens: 150
   client:
     temperature: 0.8
-    max_tokens: 200
+    max_tokens: 150
   diagnostician:
     temperature: 0.3         # Más determinístico
-    max_tokens: 1024
+    max_tokens: 800
   auditor:
     temperature: 0.1
-    max_tokens: 512
+    max_tokens: 400
   safety:
     temperature: 0.0
     max_tokens: 128
