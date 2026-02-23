@@ -96,3 +96,35 @@ class BaseAgent(ABC):
                     )
 
         return ""
+
+    def _generate_stream(self, messages: list[dict]):
+        """Token generator for real-time streaming via llama-cpp-python.
+
+        Prepends the system prompt and yields content delta strings one at a
+        time as the model produces them.  Stops silently on any error so that
+        callers do not need to handle exceptions.
+
+        Args:
+            messages: Chat-completion messages (user/assistant turns).
+
+        Yields:
+            Non-empty string tokens from the model's streamed response.
+        """
+        if self.llm is None:
+            return
+
+        full_messages = [{"role": "system", "content": self.system_prompt}] + messages
+
+        try:
+            response = self.llm.create_chat_completion(  # type: ignore[union-attr]
+                messages=full_messages,
+                temperature=self.temperature,
+                max_tokens=self.max_tokens,
+                stream=True,
+            )
+            for chunk in response:
+                delta = chunk["choices"][0]["delta"].get("content", "")
+                if delta:
+                    yield delta
+        except Exception as exc:
+            logger.error("LLM streaming failed: %s", exc)

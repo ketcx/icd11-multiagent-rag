@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import time
 import uuid
+from collections.abc import Generator
 from pathlib import Path
 
 import streamlit as st
@@ -282,12 +283,68 @@ def _default_profile(language: str) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def _run_until_interrupt(initial_state: dict | None = None) -> None:
-    """Streams the graph forward until it finishes or hits a human_input interrupt."""
+def _char_stream(text: str) -> Generator[str, None, None]:
+    """Yields individual characters with a small delay for a typing animation.
+
+    Used with ``st.write_stream()`` to reveal therapist text progressively in
+    interactive mode instead of showing the full response at once.
+    """
+    for char in text:
+        yield char
+        time.sleep(0.012)
+
+
+def _run_until_interrupt(initial_state: dict | None = None, interactive: bool = False) -> None:
+    """Streams the graph forward until it finishes or hits a human_input interrupt.
+
+    Uses ``stream_mode='updates'`` so that each node's output is available as
+    soon as the node completes.  Therapist and client messages are rendered
+    immediately rather than after the full graph finishes.
+
+    Args:
+        initial_state: Full state dict when starting a new session; ``None``
+            when resuming after a human-input interrupt.
+        interactive: When ``True`` the therapist's message is revealed via a
+            typing animation (``st.write_stream``); otherwise it is rendered
+            as plain markdown.
+    """
     graph = st.session_state.graph
     config = st.session_state.config
-    for _ in graph.stream(initial_state, config, stream_mode="values"):
-        pass
+    status_placeholder = st.empty()
+
+    for update in graph.stream(initial_state, config, stream_mode="updates"):
+        node_name = next(iter(update))
+        node_output = update[node_name]
+
+        if node_name == "therapist_ask":
+            status_placeholder.empty()
+            transcript = node_output.get("transcript", [])
+            if transcript:
+                last_msg = transcript[-1]
+                if last_msg.get("role") == "therapist":
+                    with st.chat_message("assistant", avatar="🧑‍⚕️"):
+                        if interactive:
+                            st.write_stream(_char_stream(last_msg["content"]))
+                        else:
+                            st.markdown(last_msg["content"])
+                        if domain := last_msg.get("domain"):
+                            st.caption(f"{t('domain_caption')}: `{domain}`")
+            status_placeholder = st.empty()
+
+        elif node_name == "client_respond":
+            status_placeholder.empty()
+            transcript = node_output.get("transcript", [])
+            if transcript:
+                last_msg = transcript[-1]
+                if last_msg.get("role") == "client":
+                    with st.chat_message("user", avatar="👤"):
+                        st.markdown(last_msg["content"])
+            status_placeholder = st.empty()
+
+        else:
+            status_placeholder.markdown("⏳")
+
+    status_placeholder.empty()
 
 
 def _snapshot() -> tuple[dict, bool]:
@@ -467,8 +524,7 @@ def main() -> None:
         if st.button(btn_label, type="primary"):
             st.session_state.started = True
             initial_state = _build_initial_state(lang, is_interactive, cfg)
-            with st.spinner(t("spinner_init")):
-                _run_until_interrupt(initial_state)
+            _run_until_interrupt(initial_state, interactive=is_interactive)
             st.rerun()
         return
 
@@ -489,8 +545,7 @@ def main() -> None:
                 {"transcript": updated_transcript, "current_step": "human_input"},
                 as_node="human_input",
             )
-            with st.spinner(t("spinner_thinking")):
-                _run_until_interrupt()
+            _run_until_interrupt(interactive=True)
             st.rerun()
         return
 
@@ -502,9 +557,7 @@ def main() -> None:
         covered = len(current_state.get("domains_covered", []))
         st.info(t("progress_info", turn=turn, max=max_turns, pending=pending, covered=covered))
 
-        with st.spinner(t("spinner_simulating")):
-            _run_until_interrupt()
-            time.sleep(0.4)
+        _run_until_interrupt()
         st.rerun()
 
 

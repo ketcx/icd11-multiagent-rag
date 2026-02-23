@@ -38,6 +38,24 @@ class ClientAgent(BaseAgent):
 
         return state
 
+    def act_stream(self, state: dict):
+        """Yields tokens for the client's response without updating state.
+
+        Mirrors the prompt construction of ``act()`` so the streamed output is
+        identical to what would be generated non-streamingly.
+
+        Args:
+            state: Current ``SessionState`` dictionary.
+
+        Yields:
+            Non-empty token strings from the model, or nothing when LLM is
+            unavailable (mock mode).
+        """
+        language = state.get("language", "Español")
+        profile = state.get("client_profile", {})
+        messages = self._build_messages(state["transcript"], profile, language)
+        yield from self._generate_stream(messages)
+
     def _build_messages(self, transcript: list[dict], profile: dict, language: str) -> list[dict]:
         """Builds the message payload for the LLM.
 

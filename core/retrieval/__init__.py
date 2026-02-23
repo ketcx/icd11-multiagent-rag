@@ -1,5 +1,8 @@
 """RAG retrieval pipeline initialization."""
 
+import numpy as np
+from langchain_core.embeddings import Embeddings
+
 from core.retrieval.query_builder import QueryBuilder
 from core.retrieval.retrievers import HybridRetriever
 
@@ -9,7 +12,7 @@ __all__ = ["QueryBuilder", "HybridRetriever", "init_rag_pipeline"]
 _rag_pipeline = None
 
 
-class SimpleEmbeddings:
+class SimpleEmbeddings(Embeddings):
     """Ultra-lightweight embeddings using TF-IDF-like vectorization."""
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
@@ -18,7 +21,8 @@ class SimpleEmbeddings:
             from sklearn.feature_extraction.text import TfidfVectorizer
 
             vectorizer = TfidfVectorizer(max_features=384, stop_words="english")
-            vectors = vectorizer.fit_transform(texts).toarray()
+            sparse = vectorizer.fit_transform(texts)
+            vectors = np.asarray(sparse.todense())
             return vectors.tolist()
         except Exception as e:
             # Fallback: return zeros

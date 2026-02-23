@@ -3,12 +3,8 @@
 import re
 from collections.abc import Generator
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import fitz  # type: ignore # PyMuPDF
-
-if TYPE_CHECKING:
-    pass
 
 # from core.schemas.session import DocumentChunk # Will be defined later
 

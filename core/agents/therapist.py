@@ -66,6 +66,30 @@ class TherapistAgent(BaseAgent):
 
         return state
 
+    def act_stream(self, state: dict):
+        """Yields tokens for the therapist's next question without updating state.
+
+        Mirrors the prompt construction of ``act()`` so the streamed output is
+        identical to what would be generated non-streamingly.
+
+        Args:
+            state: Current ``SessionState`` dictionary.
+
+        Yields:
+            Non-empty token strings from the model, or nothing when LLM is
+            unavailable (mock mode).
+        """
+        pending = state.get("domains_pending") or [
+            d for d in self.DOMAINS if d not in state.get("domains_covered", [])
+        ]
+        if not pending:
+            return
+
+        next_domain = pending[0]
+        language = state.get("language", "Español")
+        messages = self._build_messages(state["transcript"], next_domain, language)
+        yield from self._generate_stream(messages)
+
     def _build_messages(
         self, transcript: list[dict], target_domain: str, language: str
     ) -> list[dict]:

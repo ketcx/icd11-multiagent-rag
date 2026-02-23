@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import random
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from core.orchestration.state import SessionState
 
@@ -418,26 +419,38 @@ def retrieve_context(state: SessionState) -> dict:
     if rag_pipeline and len(transcript) > 0:
         try:
             queries = rag_pipeline["query_builder"].build_queries(transcript)
+            retriever = rag_pipeline["retriever"]
 
+            # Build a flat list of (query_type, query_text) pairs for parallel dispatch
+            all_queries: list[tuple[str, str]] = []
             if queries.get("semantic"):
-                semantic_chunks = rag_pipeline["retriever"].retrieve(queries["semantic"])
-                retrieved_chunks.extend(semantic_chunks)
-                query_history.append(
-                    {
-                        "type": "semantic",
-                        "query": queries["semantic"],
-                        "results": len(semantic_chunks),
-                    }
-                )
+                all_queries.append(("semantic", queries["semantic"]))
+            for q in queries.get("exact", []):
+                all_queries.append(("exact", q))
 
-            if queries.get("exact"):
-                for exact_query in queries["exact"]:
-                    exact_chunks = rag_pipeline["retriever"].retrieve(exact_query)
-                    retrieved_chunks.extend(exact_chunks)
+            # Run all queries concurrently
+            results_by_type: dict[str, list[tuple[str, int]]] = {}
+            with ThreadPoolExecutor(max_workers=4) as executor:
+                future_to_info = {
+                    executor.submit(retriever.retrieve, q_text): (q_type, q_text)
+                    for q_type, q_text in all_queries
+                }
+                for future in as_completed(future_to_info):
+                    q_type, q_text = future_to_info[future]
+                    chunks = future.result()
+                    retrieved_chunks.extend(chunks)
+                    results_by_type.setdefault(q_type, []).append((q_text, len(chunks)))
+
+            # Reconstruct query_history in the original format
+            if "semantic" in results_by_type:
+                for q_text, n in results_by_type["semantic"]:
+                    query_history.append({"type": "semantic", "query": q_text, "results": n})
+            if "exact" in results_by_type:
+                exact_queries = [q for q, _ in results_by_type["exact"]]
                 query_history.append(
                     {
                         "type": "exact",
-                        "queries": queries["exact"],
+                        "queries": exact_queries,
                         "total_results": len(retrieved_chunks),
                     }
                 )

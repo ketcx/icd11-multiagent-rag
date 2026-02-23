@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+from datetime import UTC
 from pathlib import Path
 
 import click
@@ -105,13 +106,13 @@ def run(profile: str, config: str, language: str | None, seed: int) -> None:
     click.echo(f"  Profile  : {profile}")
     click.echo(f"  Language : {session_language}")
 
+    import uuid
     from datetime import datetime
-    from uuid import uuid4
 
     from core.orchestration.graph import build_graph
     from core.orchestration.state import SessionState
 
-    session_id = f"sess_{datetime.now(datetime.UTC).strftime('%Y%m%d_%H%M%S')}_{uuid4().hex[:6]}"
+    session_id = f"sess_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
 
     initial_state: SessionState = {
         "session_id": session_id,
@@ -255,13 +256,8 @@ def eval(suite: str, config: str, output: str) -> None:
 @click.option("--config", default="configs/app.yaml", show_default=True, help="Config file.")
 def download_models(config: str) -> None:
     """Downloads the GGUF LLM and PubMedBERT embeddings declared in the config."""
-    from scripts.download_models import (
-        _load_config as _dl_cfg,
-    )
-    from scripts.download_models import (
-        download_embeddings,
-        download_llm,
-    )
+    from scripts.download_models import _load_config as _dl_cfg
+    from scripts.download_models import download_embeddings, download_llm
 
     cfg = _dl_cfg(config)
     download_llm(cfg)

@@ -12,7 +12,7 @@ POST /sessions/{id}/finalize   → force diagnosis + finalise
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
@@ -66,9 +66,7 @@ def create_session(body: CreateSessionRequest) -> dict:
     """
     from core.orchestration.nodes import init_session
 
-    session_id = (
-        f"sess_{datetime.now(datetime.UTC).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
-    )
+    session_id = f"sess_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
 
     initial_state: dict = {
         "session_id": session_id,
