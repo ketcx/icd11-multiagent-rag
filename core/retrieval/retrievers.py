@@ -3,12 +3,18 @@
 from langchain_chroma import Chroma
 from rank_bm25 import BM25Okapi
 
+
 class HybridRetriever:
     """Combines dense retrieval (Chroma) + BM25 with Reciprocal Rank Fusion."""
 
-    def __init__(self, vectorstore: Chroma, bm25_corpus: list[dict],
-                 top_k_dense: int = 8, top_k_bm25: int = 8,
-                 top_k_final: int = 6):
+    def __init__(
+        self,
+        vectorstore: Chroma,
+        bm25_corpus: list[dict],
+        top_k_dense: int = 8,
+        top_k_bm25: int = 8,
+        top_k_final: int = 6,
+    ):
         self.vectorstore = vectorstore
         self.top_k_dense = top_k_dense
         self.top_k_bm25 = top_k_bm25
@@ -102,9 +108,9 @@ class HybridRetriever:
         # BM25
         tokenized_query = query.lower().split()
         bm25_scores = self.bm25.get_scores(tokenized_query)
-        bm25_top = sorted(
-            enumerate(bm25_scores), key=lambda x: x[1], reverse=True
-        )[:self.top_k_bm25]
+        bm25_top = sorted(enumerate(bm25_scores), key=lambda x: x[1], reverse=True)[
+            : self.top_k_bm25
+        ]
 
         # Fusion (Reciprocal Rank Fusion, k=60)
         return self._rrf_fusion(dense_results, bm25_top)

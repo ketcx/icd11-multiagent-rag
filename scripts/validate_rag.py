@@ -3,22 +3,23 @@
 
 from pathlib import Path
 
+
 def validate_ingestion():
     """Check PDF ingestion artifacts."""
     pdf_path = Path(__file__).parent.parent / "files" / "cie11.pdf"
     chroma_path = Path(__file__).parent.parent / "data" / "indexes" / "chroma"
-    
-    print("\n" + "="*70)
+
+    print("\n" + "=" * 70)
     print("📊 RAG PIPELINE VALIDATION")
-    print("="*70)
-    
+    print("=" * 70)
+
     print("\n1️⃣ INGESTION ARTIFACTS")
     print(f"   PDF: {pdf_path.name}")
     print(f"   • Status: {'✅ EXISTS' if pdf_path.exists() else '❌ MISSING'}")
     if pdf_path.exists():
-        size = pdf_path.stat().st_size / (1024*1024)
+        size = pdf_path.stat().st_size / (1024 * 1024)
         print(f"   • Size: {size:.2f} MB")
-    
+
     print(f"\n   Chroma Index: {chroma_path.name}")
     print(f"   • Status: {'✅ EXISTS' if chroma_path.exists() else '❌ MISSING'}")
     if chroma_path.exists():
@@ -27,26 +28,27 @@ def validate_ingestion():
         for f in files:
             print(f"     - {f.name}")
 
+
 def validate_pipeline():
     """Test RAG pipeline initialization and retrieval."""
     print("\n2️⃣ PIPELINE INITIALIZATION")
-    
+
     try:
         from core.retrieval import get_rag_pipeline
-        
+
         pipeline = get_rag_pipeline()
-        
+
         if pipeline is None:
             print("   ⚠️  Pipeline returned None (using mock fallback)")
             return False
-        
+
         print("   ✅ RAG pipeline initialized")
-        print(f"   • Retriever: HybridRetriever (Dense + BM25)")
-        print(f"   • Query Builder: ChunkingStrategy")
-        print(f"   • Embedding: TF-IDF (lightweight, 384D)")
-        
+        print("   • Retriever: HybridRetriever (Dense + BM25)")
+        print("   • Query Builder: ChunkingStrategy")
+        print("   • Embedding: TF-IDF (lightweight, 384D)")
+
         return True
-        
+
     except Exception as e:
         print(f"   ❌ Pipeline initialization failed: {e}")
         return False
@@ -55,10 +57,10 @@ def validate_pipeline():
 def validate_agents():
     """Check if agents are registered."""
     print("\n3️⃣ AGENT REGISTRATION")
-    
+
     try:
         from core.orchestration.nodes import AGENTS
-        
+
         # Agents should be loaded by app.py during init
         if not AGENTS:
             print("   ⚠️  No agents registered yet (will be loaded in Streamlit)")
@@ -66,9 +68,9 @@ def validate_agents():
             print(f"   ✅ Agents registered: {list(AGENTS.keys())}")
             for name in AGENTS:
                 print(f"      • {name}")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"   ❌ Agent check failed: {e}")
         return False
@@ -77,21 +79,22 @@ def validate_agents():
 def validate_graph():
     """Check if the LangGraph is buildable."""
     print("\n4️⃣ LANGGRAPH ORCHESTRATION")
-    
+
     try:
-        from core.orchestration.graph import build_graph
         from langgraph.checkpoint.memory import MemorySaver
-        
+
+        from core.orchestration.graph import build_graph
+
         memory = MemorySaver()
-        graph = build_graph(checkpointer=memory)
-        
+        build_graph(checkpointer=memory)
+
         print("   ✅ LangGraph compiled successfully")
-        print(f"   • Checkpointer: MemorySaver (for interrupts)")
-        print(f"   • Nodes: init → therapist → risk_check → ... → finalize")
-        print(f"   • Interrupt: human_input (for interactive mode)")
-        
+        print("   • Checkpointer: MemorySaver (for interrupts)")
+        print("   • Nodes: init → therapist → risk_check → ... → finalize")
+        print("   • Interrupt: human_input (for interactive mode)")
+
         return True
-        
+
     except Exception as e:
         print(f"   ❌ Graph validation failed: {e}")
         return False
@@ -100,10 +103,9 @@ def validate_graph():
 def validate_endpoints():
     """Check if all key endpoints exist."""
     print("\n5️⃣ IMPLEMENTATION CHECKLIST")
-    
+
     from pathlib import Path
-    import os
-    
+
     files_to_check = {
         "core/agents/therapist.py": "TherapistAgent",
         "core/agents/client.py": "ClientAgent",
@@ -112,9 +114,9 @@ def validate_endpoints():
         "core/orchestration/nodes.py": "retrieve_context",
         "apps/ui/app.py": "load_agents",
     }
-    
+
     base = Path(__file__).parent.parent
-    
+
     for relpath, component in files_to_check.items():
         fpath = base / relpath
         if fpath.exists():
@@ -132,9 +134,9 @@ def validate_endpoints():
 
 def show_summary():
     """Show final summary."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("PIPELINE READY FOR TESTING")
-    print("="*70)
+    print("=" * 70)
     print("""
 ✅ Status: All components initialized
    
@@ -164,7 +166,7 @@ To index full PDF:
 To diagnose:
    python scripts/diagnose_chroma.py
 """)
-    print("="*70)
+    print("=" * 70)
 
 
 if __name__ == "__main__":
@@ -173,7 +175,7 @@ if __name__ == "__main__":
     validate_agents()
     validate_graph()
     validate_endpoints()
-    
+
     if pipeline_ok:
         show_summary()
     else:

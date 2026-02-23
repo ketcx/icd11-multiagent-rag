@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import pytest
-from core.orchestration.nodes import coverage_check, risk_check, init_session
+from core.orchestration.nodes import coverage_check, init_session, risk_check
 
 
 class TestInitSession:
@@ -37,6 +36,7 @@ class TestInitSession:
 
     def test_all_domains_present_after_shuffle(self, base_session_state: dict) -> None:
         from core.agents.therapist import TherapistAgent
+
         state = dict(base_session_state)
         state["domains_pending"] = []
         result = init_session(state)

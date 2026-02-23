@@ -1,20 +1,22 @@
 """Main LangGraph architecture for the multi-agent system."""
 
-from langgraph.graph import StateGraph, END
-from core.orchestration.state import SessionState
+from langgraph.graph import END, StateGraph
+
 from core.orchestration.nodes import (
-    init_session,
-    therapist_ask,
     client_respond,
-    human_input_node,
     coverage_check,
-    risk_check,
-    retrieve_context,
     diagnostician_draft,
     evidence_audit,
     finalize_session,
+    human_input_node,
+    init_session,
+    retrieve_context,
+    risk_check,
     safe_exit,
+    therapist_ask,
 )
+from core.orchestration.state import SessionState
+
 
 def build_graph(checkpointer=None) -> StateGraph:
     """Builds the multi-agent orchestration graph.
@@ -50,24 +52,32 @@ def build_graph(checkpointer=None) -> StateGraph:
     graph.add_edge("therapist_ask", "risk_check")
 
     # Risk check interception right after Therapist
-    graph.add_conditional_edges("risk_check", _route_risk, {
-        "auto": "client_respond",                # Direct to auto client if safe + auto
-        "interactive": "human_input",            # Direct to human if safe + interactive
-        "safe_diagnostician": "evidence_audit",   
-        "safe_client": "coverage_check",          
-        "safe_human": "coverage_check",
-        "risky": "safe_exit",                     
-    })
+    graph.add_conditional_edges(
+        "risk_check",
+        _route_risk,
+        {
+            "auto": "client_respond",  # Direct to auto client if safe + auto
+            "interactive": "human_input",  # Direct to human if safe + interactive
+            "safe_diagnostician": "evidence_audit",
+            "safe_client": "coverage_check",
+            "safe_human": "coverage_check",
+            "risky": "safe_exit",
+        },
+    )
 
     graph.add_edge("client_respond", "risk_check")
     graph.add_edge("human_input", "risk_check")
 
     # Coverage check conditional routing
-    graph.add_conditional_edges("coverage_check", _route_coverage, {
-        "continue": "therapist_ask",          
-        "complete": "retrieve_context",       
-        "max_turns": "retrieve_context",      
-    })
+    graph.add_conditional_edges(
+        "coverage_check",
+        _route_coverage,
+        {
+            "continue": "therapist_ask",
+            "complete": "retrieve_context",
+            "max_turns": "retrieve_context",
+        },
+    )
 
     graph.add_edge("retrieve_context", "diagnostician_draft")
     graph.add_edge("diagnostician_draft", "risk_check")
@@ -85,7 +95,7 @@ def _route_risk(state: SessionState) -> str:
         return "risky"
     step = state["current_step"]
     if step == "therapist_ask":
-        return _determine_client_mode(state) # Auto route
+        return _determine_client_mode(state)  # Auto route
     elif step == "client_respond":
         return "safe_client"
     elif step == "human_input":
@@ -94,11 +104,13 @@ def _route_risk(state: SessionState) -> str:
         return "safe_diagnostician"
     return "safe_client"
 
+
 def _determine_client_mode(state: SessionState) -> str:
     """Checks if we are in interactive mode or synthetic simulation mode."""
     if state.get("interactive_mode", False):
         return "interactive"
     return "auto"
+
 
 def _route_coverage(state: SessionState) -> str:
     """Determines whether to continue the interview or proceed to diagnosis."""

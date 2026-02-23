@@ -114,10 +114,11 @@ class DiagnosticianAgent(BaseAgent):
         Returns:
             List of chat-completion message dicts.
         """
-        context_str = "\n---\n".join(c["content"] for c in chunks) if chunks else "No context available."
+        context_str = (
+            "\n---\n".join(c["content"] for c in chunks) if chunks else "No context available."
+        )
         transcript_str = "\n".join(
-            f"{turn['role'].capitalize()}: {turn['content']}"
-            for turn in transcript
+            f"{turn['role'].capitalize()}: {turn['content']}" for turn in transcript
         )
 
         prompt = (

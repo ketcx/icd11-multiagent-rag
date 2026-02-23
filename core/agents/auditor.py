@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+
 from core.agents.base import BaseAgent
 
 
@@ -68,9 +69,7 @@ class EvidenceAuditorAgent(BaseAgent):
                         }
                     )
 
-        traceability_score = (
-            round(grounded_claims / total_claims, 4) if total_claims > 0 else 1.0
-        )
+        traceability_score = round(grounded_claims / total_claims, 4) if total_claims > 0 else 1.0
 
         llm_commentary: str | None = None
         if self.llm is not None and hypotheses:
@@ -102,9 +101,7 @@ class EvidenceAuditorAgent(BaseAgent):
     def _request_llm_commentary(self, state: dict, issues: list[dict]) -> str | None:
         """Asks the LLM to comment on evidence quality; returns None on failure."""
         language = state.get("language", "Español")
-        hypotheses_summary = "; ".join(
-            h.get("label", "?") for h in state.get("hypotheses", [])
-        )
+        hypotheses_summary = "; ".join(h.get("label", "?") for h in state.get("hypotheses", []))
         unverified_count = len(issues)
 
         if language == "Español":
