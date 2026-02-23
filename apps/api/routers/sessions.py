@@ -123,7 +123,12 @@ def execute_turn(session_id: str, body: TurnRequest) -> dict:
             detail="Session was halted by the safety gate.",
         )
 
-    from core.orchestration.nodes import client_respond, coverage_check, risk_check, therapist_ask
+    from core.orchestration.nodes import (
+        client_respond,
+        coverage_check,
+        risk_check,
+        therapist_ask,
+    )
 
     # Therapist asks
     state.update(therapist_ask(state))
@@ -201,7 +206,11 @@ def finalize_session_endpoint(session_id: str) -> dict:
             detail="Session is already finalised.",
         )
 
-    from core.orchestration.nodes import diagnostician_draft, evidence_audit, retrieve_context
+    from core.orchestration.nodes import (
+        diagnostician_draft,
+        evidence_audit,
+        retrieve_context,
+    )
 
     state.update(retrieve_context(state))
     state.update(diagnostician_draft(state))
