@@ -9,12 +9,32 @@ from core.agents.prompts import get_rapport_prompt
 
 # Random name pools used when no real patient name is available in the profile.
 _RANDOM_NAMES_ES = [
-    "Carlos", "Lucía", "Andrés", "Sofía", "Miguel", "Elena",
-    "Javier", "Marta", "Roberto", "Carmen", "Pablo", "Laura",
+    "Carlos",
+    "Lucía",
+    "Andrés",
+    "Sofía",
+    "Miguel",
+    "Elena",
+    "Javier",
+    "Marta",
+    "Roberto",
+    "Carmen",
+    "Pablo",
+    "Laura",
 ]
 _RANDOM_NAMES_EN = [
-    "Alex", "Jordan", "Sam", "Taylor", "Morgan", "Casey",
-    "Riley", "Jamie", "Quinn", "Avery", "Dana", "Skyler",
+    "Alex",
+    "Jordan",
+    "Sam",
+    "Taylor",
+    "Morgan",
+    "Casey",
+    "Riley",
+    "Jamie",
+    "Quinn",
+    "Avery",
+    "Dana",
+    "Skyler",
 ]
 
 _GENERIC_NAMES = {"demo", "unknown", "test", "test user", "paciente", "patient", ""}

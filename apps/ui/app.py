@@ -11,10 +11,10 @@ from pathlib import Path
 import streamlit as st
 import yaml
 
-_logger = logging.getLogger(__name__)
-
 from core.orchestration.graph import build_graph
 from core.orchestration.nodes import AGENTS
+
+_logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Internationalisation (i18n)

@@ -196,7 +196,9 @@ class BaseAgent(ABC):
         if self.llm is None:
             return
 
-        full_messages = [{"role": "system", "content": self.system_prompt}] + messages  # streaming always uses default prompt
+        full_messages = [
+            {"role": "system", "content": self.system_prompt}
+        ] + messages  # streaming always uses default prompt
 
         try:
             response = self.llm.create_chat_completion(  # type: ignore[union-attr]
