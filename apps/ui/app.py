@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import time
 import uuid
 from collections.abc import Generator
@@ -12,6 +13,8 @@ import yaml
 
 from core.orchestration.graph import build_graph
 from core.orchestration.nodes import AGENTS
+
+_logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Internationalisation (i18n)
@@ -253,6 +256,9 @@ def _build_initial_state(language: str, interactive: bool, cfg: dict) -> dict:
         "current_step": "",
         "turn_count": 0,
         "max_turns": cfg["session"]["max_turns"],
+        "rapport_complete": False,
+        "rapport_turns": 0,
+        "rapport_turns_target": cfg["session"].get("rapport_turns", 3),
         "finalized": False,
         "interactive_mode": interactive,
         "language": language,
@@ -312,46 +318,67 @@ def _run_until_interrupt(initial_state: dict | None = None, interactive: bool = 
     config = st.session_state.config
     status_placeholder = st.empty()
 
-    for update in graph.stream(initial_state, config, stream_mode="updates"):
-        node_name = next(iter(update))
-        node_output = update[node_name]
+    try:
+        for update in graph.stream(initial_state, config, stream_mode="updates"):
+            node_name = next(iter(update))
+            node_output = update[node_name]
 
-        if node_name == "therapist_ask":
-            status_placeholder.empty()
-            transcript = node_output.get("transcript", [])
-            if transcript:
-                last_msg = transcript[-1]
-                if last_msg.get("role") == "therapist":
-                    with st.chat_message("assistant", avatar="🧑‍⚕️"):
-                        if interactive:
-                            st.write_stream(_char_stream(last_msg["content"]))
-                        else:
+            if node_name in ("therapist_ask", "rapport_ask"):
+                status_placeholder.empty()
+                transcript = node_output.get("transcript", [])
+                if transcript:
+                    last_msg = transcript[-1]
+                    if last_msg.get("role") == "therapist":
+                        with st.chat_message("assistant", avatar="🧑‍⚕️"):
+                            if interactive:
+                                st.write_stream(_char_stream(last_msg["content"]))
+                            else:
+                                st.markdown(last_msg["content"])
+                            if domain := last_msg.get("domain"):
+                                st.caption(f"{t('domain_caption')}: `{domain}`")
+                status_placeholder = st.empty()
+
+            elif node_name == "client_respond":
+                status_placeholder.empty()
+                transcript = node_output.get("transcript", [])
+                if transcript:
+                    last_msg = transcript[-1]
+                    if last_msg.get("role") == "client":
+                        with st.chat_message("user", avatar="👤"):
                             st.markdown(last_msg["content"])
-                        if domain := last_msg.get("domain"):
-                            st.caption(f"{t('domain_caption')}: `{domain}`")
-            status_placeholder = st.empty()
+                status_placeholder = st.empty()
 
-        elif node_name == "client_respond":
-            status_placeholder.empty()
-            transcript = node_output.get("transcript", [])
-            if transcript:
-                last_msg = transcript[-1]
-                if last_msg.get("role") == "client":
-                    with st.chat_message("user", avatar="👤"):
-                        st.markdown(last_msg["content"])
-            status_placeholder = st.empty()
+            else:
+                status_placeholder.markdown("⏳")
 
+    except RuntimeError as exc:
+        # LangGraph's IOExecutor submits checkpoint writes to a ThreadPoolExecutor.
+        # In Streamlit's threaded script-runner model the executor can be torn down
+        # before all pending put_writes() calls are submitted, raising this error.
+        # By the time it surfaces, all node work and UI rendering are already done;
+        # the failure is limited to the final bookkeeping checkpoint flush.
+        if "cannot schedule new futures after shutdown" in str(exc):
+            _logger.warning(
+                "LangGraph checkpoint flush interrupted by executor shutdown "
+                "(benign in Streamlit context — session data is intact): %s",
+                exc,
+            )
         else:
-            status_placeholder.markdown("⏳")
-
-    status_placeholder.empty()
+            raise
+    finally:
+        status_placeholder.empty()
 
 
 def _snapshot() -> tuple[dict, bool]:
     """Returns (current_state_values, is_waiting_for_human_input)."""
-    snap = st.session_state.graph.get_state(st.session_state.config)
-    values = snap.values if snap.values else {}
-    waiting = bool(snap.next) and snap.next[0] == "human_input"
+    try:
+        snap = st.session_state.graph.get_state(st.session_state.config)
+        values = snap.values if snap.values else {}
+        waiting = bool(snap.next) and snap.next[0] == "human_input"
+    except Exception as exc:
+        _logger.warning("get_state failed (returning empty snapshot): %s", exc)
+        values = {}
+        waiting = False
     return values, waiting
 
 

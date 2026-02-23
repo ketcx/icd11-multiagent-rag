@@ -10,45 +10,90 @@ from core.agents.base import BaseAgent
 # Matches trailing commas before ] or } — a common LLM JSON defect.
 _TRAILING_COMMA_RE = re.compile(r",\s*([}\]])")
 
+# Matches a single complete JSON object (non-nested) for partial recovery.
+_OBJECT_RE = re.compile(r"\{[^{}]*\}", re.DOTALL)
+
 
 def _sanitise_json(raw: str) -> str:
-    """Strips trailing commas and normalises common LLM JSON defects.
-
-    Models frequently emit constructs such as ``[..., ]`` or ``{..., }``
-    which are invalid JSON but trivially fixable.  This function applies
-    lightweight repairs before handing the string to ``json.loads``.
-
-    Args:
-        raw: Raw string extracted from the model response.
-
-    Returns:
-        Sanitised JSON string ready for ``json.loads``.
-    """
-    # Remove trailing commas before closing brackets/braces
-    cleaned = _TRAILING_COMMA_RE.sub(r"\1", raw)
-    return cleaned
+    """Strips trailing commas and normalises common LLM JSON defects."""
+    return _TRAILING_COMMA_RE.sub(r"\1", raw)
 
 
 def _extract_json_block(response: str) -> str:
     """Extracts the JSON payload from a model response.
 
-    Handles three common LLM output patterns:
-    1. Fenced code block: ```json … ```
-    2. Plain code block:  ``` … ```
-    3. Raw JSON (no fencing)
+    Strategy (in order):
+    1. Fenced code block — ````json … ``` ``
+    2. Plain code block  — ```` ``` … ``` ``
+    3. Bracket-aware scan — finds the first ``[`` or ``{`` and walks the
+       string tracking depth and string literals to locate the matching
+       closing bracket.  This correctly handles nested structures and stops
+       before any hallucinated/looping text that follows the JSON.
 
-    Args:
-        response: Full model output string.
-
-    Returns:
-        Extracted JSON string (may still contain LLM defects; pass through
-        ``_sanitise_json`` before parsing).
+    Returns the extracted candidate string; pass through ``_sanitise_json``
+    before calling ``json.loads``.
     """
     if "```json" in response:
         return response.split("```json")[1].split("```")[0].strip()
     if "```" in response:
         return response.split("```")[1].split("```")[0].strip()
+
+    # Pick whichever bracket type appears first in the response so that a
+    # single JSON object (``{…}``) whose values contain ``[]`` is not
+    # mistakenly matched by the ``[`` scanner before the ``{`` scanner.
+    candidates = []
+    for pair in [("[", "]"), ("{", "}")]:
+        idx = response.find(pair[0])
+        if idx != -1:
+            candidates.append((idx, pair))
+    candidates.sort(key=lambda c: c[0])
+
+    for _, (start_char, end_char) in candidates:
+        start_idx = response.find(start_char)
+        if start_idx == -1:
+            continue
+        depth = 0
+        in_string = False
+        escape = False
+        for i, ch in enumerate(response[start_idx:], start=start_idx):
+            if escape:
+                escape = False
+                continue
+            if ch == "\\" and in_string:
+                escape = True
+                continue
+            if ch == '"':
+                in_string = not in_string
+                continue
+            if in_string:
+                continue
+            if ch == start_char:
+                depth += 1
+            elif ch == end_char:
+                depth -= 1
+                if depth == 0:
+                    return response[start_idx : i + 1]
+        # Closing bracket not found (truncated output) — return what we have.
+        return response[start_idx:].strip()
+
     return response.strip()
+
+
+def _extract_partial_hypotheses(response: str) -> list[dict]:
+    """Fallback: extracts every complete JSON object found in a malformed response.
+
+    Used when the model starts hallucinating mid-array so that at least the
+    valid objects produced before the model went off-rails are preserved.
+    """
+    results = []
+    for m in _OBJECT_RE.finditer(response):
+        try:
+            obj = json.loads(_sanitise_json(m.group()))
+            if isinstance(obj, dict) and "label" in obj:
+                results.append(obj)
+        except Exception:
+            continue
+    return results
 
 
 class DiagnosticianAgent(BaseAgent):
@@ -75,7 +120,7 @@ class DiagnosticianAgent(BaseAgent):
             state.get("retrieved_chunks", []),
             language,
         )
-        response = self._generate(messages)
+        response = self._generate(messages, postprocess=False)
 
         hypotheses: list[dict] = []
         try:
@@ -83,17 +128,19 @@ class DiagnosticianAgent(BaseAgent):
             parsed = json.loads(json_str)
             hypotheses = parsed if isinstance(parsed, list) else [parsed]
         except Exception as exc:
-            # Surface the raw LLM output as a single low-confidence entry so
-            # the session can continue and the user can inspect the raw text.
-            hypotheses = [
-                {
-                    "label": "JSON parse error — raw model output attached",
-                    "code": "N/A",
-                    "confidence": "LOW",
-                    "evidence_for": [response],
-                    "evidence_against": [str(exc)],
-                }
-            ]
+            # Try to salvage any complete objects produced before the model
+            # went off-rails (e.g. mid-array hallucination).
+            hypotheses = _extract_partial_hypotheses(response)
+            if not hypotheses:
+                hypotheses = [
+                    {
+                        "label": "JSON parse error — raw model output attached",
+                        "code": "N/A",
+                        "confidence": "LOW",
+                        "evidence_for": [response[:500]],
+                        "evidence_against": [str(exc)],
+                    }
+                ]
 
         state["hypotheses"] = hypotheses
         return state
@@ -125,8 +172,15 @@ class DiagnosticianAgent(BaseAgent):
             f"TRANSCRIPT:\n{transcript_str}\n\n"
             f"ICD-11 CONTEXT:\n{context_str}\n\n"
             f"Analyse the transcript and generate diagnostic hypotheses grounded ONLY in the "
-            f"provided ICD-11 context. Reply in {language}. "
-            f"Output ONLY a valid JSON array with no trailing commas. Do NOT wrap it in markdown."
+            f"provided ICD-11 context. Reply in {language}.\n\n"
+            f"CRITICAL OUTPUT RULES:\n"
+            f"1. Output ONLY a valid JSON array. No text before or after the JSON.\n"
+            f"2. Do NOT wrap it in markdown code fences.\n"
+            f"3. No trailing commas.\n"
+            f"4. STOP immediately after the closing ] bracket. Do NOT repeat or continue.\n"
+            f"5. Each object must have exactly these keys: "
+            f'"label", "code", "confidence", "evidence_for", "evidence_against".\n\n'
+            f"JSON Output:\n"
         )
 
         return [{"role": "user", "content": prompt}]
