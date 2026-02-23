@@ -43,6 +43,9 @@ def base_session_state(sample_profile: dict) -> dict:
         "current_step": "init",
         "turn_count": 0,
         "max_turns": 40,
+        "rapport_complete": True,   # tests start post-rapport by default
+        "rapport_turns": 3,
+        "rapport_turns_target": 3,
         "finalized": False,
         "interactive_mode": False,
         "language": "Español",

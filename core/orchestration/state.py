@@ -35,6 +35,11 @@ class SessionState(TypedDict):
     risk_detected: bool  # RiskGate flag
     risk_type: str | None
 
+    # Rapport phase
+    rapport_complete: bool  # True once the opening rapport turns are done
+    rapport_turns: int  # Number of rapport turns completed so far
+    rapport_turns_target: int  # How many rapport turns to run before clinical exploration
+
     # Control
     current_step: str  # Current node
     turn_count: int  # Number of conversation turns

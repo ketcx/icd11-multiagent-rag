@@ -232,6 +232,26 @@ _MOCK_CLIENT_EN: dict[str, list[str]] = {
 }
 
 
+_MOCK_RAPPORT_ES: list[str] = [
+    "[Mock] Hola, bienvenido/a. Antes de empezar quería asegurarme de que estás en un lugar tranquilo y con tiempo para hablar. Lo que hablemos aquí es confidencial, salvo que surja alguna situación de riesgo para tu seguridad. ¿Qué te trae hoy?",
+    "[Mock] Gracias por compartir eso; no siempre es fácil hablar de estas cosas. Para entenderlo mejor, ¿podrías contarme un poco más sobre cómo esto ha estado afectando tu día a día?",
+    "[Mock] Muchas gracias. Lo que estoy escuchando es que llevas un tiempo con este malestar y que está impactando varias áreas de tu vida. ¿Lo entendí bien? A partir de ahora me gustaría explorar contigo diferentes áreas de forma más estructurada para tener un panorama completo.",
+]
+
+_MOCK_RAPPORT_EN: list[str] = [
+    "[Mock] Hello, welcome. Before we begin I want to make sure you're in a private place with some time to talk. What we discuss is confidential, except if there is a safety concern. What brings you here today?",
+    "[Mock] Thank you for sharing that — it's not always easy to talk about these things. To understand it better, could you tell me a little more about how this has been affecting your day-to-day life?",
+    "[Mock] Thank you very much. What I'm hearing is that you've been dealing with this distress for a while and it's affecting several areas of your life. Did I get that right? From here I'd like to explore different areas with you in a more structured way to get a fuller picture.",
+]
+
+
+def _mock_rapport_message(rapport_turns: int, language: str) -> str:
+    """Returns the turn-appropriate mock rapport message."""
+    bank = _MOCK_RAPPORT_ES if language == "Español" else _MOCK_RAPPORT_EN
+    idx = min(rapport_turns, len(bank) - 1)
+    return bank[idx]
+
+
 def _mock_therapist_question(domain: str, language: str) -> str:
     """Returns a random domain-appropriate mock therapist question."""
     bank = _MOCK_THERAPIST_ES if language == "Español" else _MOCK_THERAPIST_EN
@@ -284,8 +304,59 @@ def init_session(state: SessionState) -> dict:
         "coverage_complete": False,
         "risk_detected": False,
         "finalized": False,
+        "rapport_complete": state.get("rapport_complete", False),
+        "rapport_turns": state.get("rapport_turns", 0),
+        "rapport_turns_target": state.get("rapport_turns_target", 3),
         "current_step": "init_session",
     }
+
+
+def rapport_ask(state: SessionState) -> dict:
+    """Generates the therapist's turn during the rapport-building phase.
+
+    Runs for ``rapport_turns_target`` turns before transitioning to clinical
+    domain exploration.  Uses the rapport-specific system prompt and
+    turn-appropriate instructions rather than the clinical domain prompt.
+    """
+    rapport_turns = state.get("rapport_turns", 0)
+    language = state.get("language", "Español")
+
+    if "therapist" in AGENTS:
+        updated_state = AGENTS["therapist"].act_rapport(state)
+        updated_state["current_step"] = "rapport_ask"
+        updated_state["turn_count"] = state.get("turn_count", 0) + 1
+        updated_state["rapport_turns"] = rapport_turns + 1
+        return updated_state
+
+    # Mock fallback
+    transcript = state.get("transcript", [])
+    content = _mock_rapport_message(rapport_turns, language)
+    transcript.append(
+        {
+            "role": "therapist",
+            "content": content,
+            "phase": "rapport",
+            "turn_id": len(transcript),
+        }
+    )
+    return {
+        "transcript": transcript,
+        "turn_count": state.get("turn_count", 0) + 1,
+        "rapport_turns": rapport_turns + 1,
+        "current_step": "rapport_ask",
+    }
+
+
+def rapport_coverage_check(state: SessionState) -> dict:
+    """Determines whether the rapport phase is complete.
+
+    Compares ``rapport_turns`` against ``rapport_turns_target``.  When
+    complete, sets ``rapport_complete = True`` so the router transitions to
+    clinical domain exploration.
+    """
+    rapport_turns = state.get("rapport_turns", 0)
+    rapport_target = state.get("rapport_turns_target", 3)
+    return {"rapport_complete": rapport_turns >= rapport_target}
 
 
 def therapist_ask(state: SessionState) -> dict:

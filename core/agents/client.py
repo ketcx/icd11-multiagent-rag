@@ -92,15 +92,17 @@ class ClientAgent(BaseAgent):
         # --- Final instruction ---
         if language == "Español":
             instruction = (
-                "Responde a la última pregunta del terapeuta manteniéndote en tu personaje. "
-                "Responde en español de forma natural y breve (1-3 oraciones). "
-                "No uses jerga clínica para describir tus síntomas."
+                "Responde AHORA a la última pregunta del terapeuta como el paciente. "
+                "Escribe SOLO las palabras que el paciente diría: 1-3 oraciones naturales en español. "
+                "PROHIBIDO: etiquetas de rol (user:, model:, roleplaying, etc.), "
+                "acotaciones, meta-texto o cualquier cosa que no sea el diálogo del paciente."
             )
         else:
             instruction = (
-                "Respond to the therapist's last question staying in character. "
-                "Reply in English naturally and briefly (1-3 sentences). "
-                "Avoid clinical jargon when describing your symptoms."
+                "Respond NOW to the therapist's last question as the patient. "
+                "Write ONLY the patient's spoken words: 1-3 natural sentences in English. "
+                "FORBIDDEN: role labels (user:, model:, roleplaying, etc.), "
+                "stage directions, meta-text, or anything other than the patient's dialogue."
             )
         messages.append({"role": "user", "content": instruction})
 

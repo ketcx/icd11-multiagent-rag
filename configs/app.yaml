@@ -1,14 +1,14 @@
 # ============================================
-# Configuración principal del sistema
+# Main system configuration
 # ============================================
 
-# --- Modelos ---
+# --- Models ---
 llm:
   model_name: "bartowski/Phi-3-mini-4k-instruct-GGUF"
   model_file: "Phi-3-mini-4k-instruct-Q4_K_M.gguf"
-  n_ctx: 4096               # Tamaño de contexto
-  n_gpu_layers: -1           # -1 = todas las capas en Metal
-  n_threads: 4               # Threads CPU (Apple Silicon optimal)
+  n_ctx: 4096               # Context window size
+  n_gpu_layers: -1           # -1 = all layers on Metal
+  n_threads: 4               # CPU threads (Apple Silicon optimal)
   chat_format: "chatml"
 
 embeddings:
@@ -33,7 +33,7 @@ chunking:
   respect_sections: true
   respect_codes: true
 
-# --- Agentes ---
+# --- Agents ---
 agents:
   therapist:
     temperature: 0.7
@@ -42,8 +42,8 @@ agents:
     temperature: 0.8
     max_tokens: 150
   diagnostician:
-    temperature: 0.3         # Más determinístico
-    max_tokens: 800
+    temperature: 0.3         # More deterministic
+    max_tokens: 1200
   auditor:
     temperature: 0.1
     max_tokens: 400
@@ -51,9 +51,10 @@ agents:
     temperature: 0.0
     max_tokens: 128
 
-# --- Sesión ---
+# --- Session ---
 session:
-  max_turns: 40              # Límite de turnos por sesión
+  max_turns: 40              # Turn limit per session
+  rapport_turns: 3           # Rapport turns before clinical domain exploration
   domains:
     - mood
     - anxiety
@@ -73,19 +74,19 @@ paths:
   data_dir: "./data"
   runs_dir: "./runs"
   logs_dir: "./logs"
-  models_dir: "./models"     # Override para modelos locales
+  models_dir: "./models"     # Override for local models
 
 # --- Device ---
 device:
   preferred: "mps"           # mps | cpu
   fallback_to_cpu: true
-  precision: "fp32"          # fp32 para estabilidad en MPS
+  precision: "fp32"          # fp32 for MPS stability
 
 # --- API ---
 api:
   host: "0.0.0.0"
   port: 8000
-  reload: true               # Desarrollo
+  reload: true               # Development mode
 
 # --- Logging ---
 logging:
