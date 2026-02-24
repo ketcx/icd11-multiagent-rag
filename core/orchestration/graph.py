@@ -1,6 +1,9 @@
 """Main LangGraph architecture for the multi-agent system."""
 
+from __future__ import annotations
+
 from langgraph.graph import END, StateGraph
+from langgraph.graph.state import CompiledStateGraph
 
 from core.orchestration.nodes import (
     client_respond,
@@ -20,7 +23,7 @@ from core.orchestration.nodes import (
 from core.orchestration.state import SessionState
 
 
-def build_graph(checkpointer=None) -> StateGraph:
+def build_graph(checkpointer=None) -> CompiledStateGraph:
     """Builds the multi-agent orchestration graph.
 
     Flow:
