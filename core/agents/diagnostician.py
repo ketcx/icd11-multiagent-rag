@@ -157,7 +157,8 @@ def _deduplicate_hypotheses(hypotheses: list[dict]) -> list[dict]:
         label_key = str(h.get("label", "")).strip().lower()
         code_key = str(h.get("code", "")).strip().upper()
 
-        existing_idx = seen_labels.get(label_key) or seen_codes.get(code_key)
+        label_idx = seen_labels.get(label_key)
+        existing_idx = label_idx if label_idx is not None else seen_codes.get(code_key)
 
         if existing_idx is not None:
             # Merge evidence into the first occurrence
