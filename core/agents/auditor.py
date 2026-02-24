@@ -120,5 +120,7 @@ class EvidenceAuditorAgent(BaseAgent):
                 f"Provide a concise commentary (max 3 sentences) on the strength of evidential support."
             )
 
+        from core.agents.prompts import get_auditor_prompt
+
         messages = [{"role": "user", "content": prompt}]
-        return self._generate(messages)
+        return self._generate(messages, system_prompt=get_auditor_prompt(language))

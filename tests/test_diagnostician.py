@@ -81,6 +81,7 @@ class TestDiagnosticianJSONParsing:
         hypotheses = result["hypotheses"]
         assert len(hypotheses) == 1
         # Should gracefully degrade to an error entry
+        assert hypotheses[0]["code"] == "ERROR"
         assert hypotheses[0]["confidence"] in ("LOW", "BAJA")
 
     def test_trailing_comma_in_array_is_handled(self, minimal_state: dict) -> None:

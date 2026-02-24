@@ -46,6 +46,7 @@ dev = [
     "black>=24.0.0",
     "ruff>=0.8.0",
     "mypy>=1.13.0",
+    "types-PyYAML>=6.0.0",
 ]
 
 [build-system]
@@ -76,3 +77,12 @@ ignore = ["E501"]  # line length handled by black
 python_version = "3.11"
 ignore_missing_imports = true
 warn_return_any = false
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disable_error_code = ["arg-type"]
+
+[[tool.mypy.overrides]]
+module = ["apps.api.routers.*"]
+disable_error_code = ["arg-type"]

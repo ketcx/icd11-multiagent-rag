@@ -16,6 +16,21 @@ from core.orchestration.nodes import AGENTS
 
 _logger = logging.getLogger(__name__)
 
+# Lightweight JS snippet that scrolls the Streamlit app to the bottom.
+# Injected after each new chat message so the conversation auto-follows.
+_SCROLL_JS = (
+    '<script>window.parent.document.querySelector("section.main")'
+    ".scrollTo({top: 9999999, behavior: 'smooth'});</script>"
+)
+
+
+def _scroll_to_bottom() -> None:
+    """Injects a small JS snippet to scroll the chat to the latest message."""
+    import streamlit.components.v1 as components
+
+    components.html(_SCROLL_JS, height=0)
+
+
 # ---------------------------------------------------------------------------
 # Internationalisation (i18n)
 # ---------------------------------------------------------------------------
@@ -68,6 +83,10 @@ _STRINGS: dict[str, dict[str, str]] = {
         "en": "Turn {turn}/{max} · Pending domains: {pending} · Covered: {covered}",
         "es": "Turno {turn}/{max} · Dominios pendientes: {pending} · Cubiertos: {covered}",
     },
+    # Diagnosis progress
+    "diagnosing": {"en": "🔬 Diagnosis in progress…", "es": "🔬 Diagnóstico en progreso…"},
+    "auditing": {"en": "🔍 Auditing evidence…", "es": "🔍 Auditando evidencia…"},
+    "finalizing": {"en": "📋 Generating report…", "es": "📋 Generando informe…"},
     # Results
     "session_complete": {"en": "✅ Session complete", "es": "✅ Sesión completada"},
     "risk_terminated": {
@@ -336,6 +355,7 @@ def _run_until_interrupt(initial_state: dict | None = None, interactive: bool = 
                                 st.markdown(last_msg["content"])
                             if domain := last_msg.get("domain"):
                                 st.caption(f"{t('domain_caption')}: `{domain}`")
+                        _scroll_to_bottom()
                 status_placeholder = st.empty()
 
             elif node_name == "client_respond":
@@ -346,8 +366,15 @@ def _run_until_interrupt(initial_state: dict | None = None, interactive: bool = 
                     if last_msg.get("role") == "client":
                         with st.chat_message("user", avatar="👤"):
                             st.markdown(last_msg["content"])
+                        _scroll_to_bottom()
                 status_placeholder = st.empty()
 
+            elif node_name == "diagnostician_draft":
+                status_placeholder.info(t("diagnosing"))
+            elif node_name == "evidence_audit":
+                status_placeholder.info(t("auditing"))
+            elif node_name == "finalize_session":
+                status_placeholder.info(t("finalizing"))
             else:
                 status_placeholder.markdown("⏳")
 

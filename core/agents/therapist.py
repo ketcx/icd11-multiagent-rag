@@ -104,8 +104,10 @@ class TherapistAgent(BaseAgent):
         language = state.get("language", "Español")
 
         # Build prompt adding history + target domain logic
+        from core.agents.prompts import get_therapist_prompt
+
         messages = self._build_messages(state["transcript"], next_domain, language)
-        response = self._generate(messages)
+        response = self._generate(messages, system_prompt=get_therapist_prompt(language))
 
         # Update transcript
         state["transcript"].append(
@@ -143,8 +145,10 @@ class TherapistAgent(BaseAgent):
 
         next_domain = pending[0]
         language = state.get("language", "Español")
+        from core.agents.prompts import get_therapist_prompt
+
         messages = self._build_messages(state["transcript"], next_domain, language)
-        yield from self._generate_stream(messages)
+        yield from self._generate_stream(messages, system_prompt=get_therapist_prompt(language))
 
     def act_rapport(self, state: dict) -> dict:
         """Generates the therapist's turn during the rapport phase.

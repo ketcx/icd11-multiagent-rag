@@ -72,9 +72,9 @@ def ingest(pdf: str, config: str) -> None:
 
     build_chroma_index(
         chunks=chunks,
+        embedding_model_name=embedding_model,
         persist_dir=persist_dir,
         collection_name=collection_name,
-        embedding_model_name=embedding_model,
     )
     click.echo("  ✓ ChromaDB index built successfully.")
 
@@ -128,6 +128,9 @@ def run(profile: str, config: str, language: str | None, seed: int) -> None:
         "audit_report": None,
         "risk_detected": False,
         "risk_type": None,
+        "rapport_complete": False,
+        "rapport_turns": 0,
+        "rapport_turns_target": cfg["session"].get("rapport_turns", 3),
         "current_step": "",
         "turn_count": 0,
         "max_turns": cfg["session"]["max_turns"],
@@ -136,7 +139,7 @@ def run(profile: str, config: str, language: str | None, seed: int) -> None:
         "language": session_language,
     }
 
-    graph = build_graph(interactive=False)
+    graph = build_graph()
     final_state = graph.invoke(initial_state)
 
     # Persist output

@@ -17,7 +17,8 @@ _MAX_RETRIES = 1  # One automatic retry on transient LLM failure
 # Stop tokens for Phi-3 / ChatML format.  Without these the model overshoots
 # its answer and starts generating the next conversation turn's template
 # markers (e.g. "<|user|>", "<|im_start|>system …").
-_CHATML_STOP = ["<|end|>", "<|user|>", "<|im_start|>", "<|im_end|>", "<|endoftext|>"]
+# "<|" catches any other Phi-3 special-token leak (e.g. "<|emotions", "<|emotional").
+_CHATML_STOP = ["<|end|>", "<|user|>", "<|im_start|>", "<|im_end|>", "<|endoftext|>", "<|"]
 
 # Parenthetical meta-comments the model sometimes appends to its output,
 # e.g. "(Asegúrate de escuchar activamente…)" or "(Make sure to adjust tone…)".
@@ -36,7 +37,22 @@ _ROLE_ARTIFACT_RE = re.compile(
     re.IGNORECASE,
 )
 # HTML/angle-bracket garbage: <response, <logical, <message, etc.
-_TAG_GARBAGE_RE = re.compile(r"<[a-z]", re.IGNORECASE)
+# Also catches Phi-3 special-token leaks: <|emotions, <|emotional, etc.
+_TAG_GARBAGE_RE = re.compile(r"<[a-z|]", re.IGNORECASE)
+
+# Degeneration / repetition-collapse detector.
+# Matches when the same 4+ character token (all caps or mixed) repeats 3+ times in
+# close proximity, e.g. "NOGPT: NOGPT: NOGPT" or "GATHER:NOGATHER:GATHER".
+_DEGENERATION_RE = re.compile(
+    r"(\b[A-Z][A-Z_:]{3,})(?:[:\s,;.]*\1){2,}",
+    re.IGNORECASE,
+)
+
+# Catches sequences of ALL-CAPS "words" that aren't real (4+ chars, 3+ in a row).
+# e.g., "NOOLOGY. NOGATOKEN. NOGPTHER:"
+_ALLCAPS_GIBBERISH_RE = re.compile(
+    r"(?:\b[A-Z]{4,}\b[\s:.,;]*){3,}",
+)
 
 
 def _strip_stage_directions(text: str) -> str:
@@ -48,6 +64,26 @@ def _strip_stage_directions(text: str) -> str:
     """
     cleaned = _STAGE_DIRECTION_RE.sub(" ", text)
     return " ".join(cleaned.split()).strip()
+
+
+def _strip_degeneration(text: str) -> str:
+    """Truncates output at the first sign of repetitive token collapse.
+
+    Small quantised models occasionally degenerate into sequences like
+    ``NOGPT: NOGPTHER: NOGATHER:GATHER:DATA`` or runs of ALL-CAPS gibberish.
+    This function keeps only the coherent text before the collapse point.
+    """
+    # Check for repeated-token patterns
+    m = _DEGENERATION_RE.search(text)
+    if m:
+        text = text[: m.start()]
+
+    # Check for runs of ALL-CAPS gibberish words
+    m = _ALLCAPS_GIBBERISH_RE.search(text)
+    if m:
+        text = text[: m.start()]
+
+    return text.strip()
 
 
 def _strip_role_artifacts(text: str) -> str:
@@ -94,11 +130,13 @@ class BaseAgent(ABC):
         system_prompt: str,
         temperature: float = 0.7,
         max_tokens: int = 512,
+        repeat_penalty: float = 1.3,
     ) -> None:
         self.llm = llm
         self.system_prompt = system_prompt
         self.temperature = temperature
         self.max_tokens = max_tokens
+        self.repeat_penalty = repeat_penalty
 
     @abstractmethod
     def act(self, state: dict) -> dict:
@@ -147,11 +185,12 @@ class BaseAgent(ABC):
 
         for attempt in range(_MAX_RETRIES + 1):
             try:
-                response = self.llm.create_chat_completion(  # type: ignore[union-attr]
+                response = self.llm.create_chat_completion(  # type: ignore[union-attr, attr-defined]
                     messages=full_messages,
                     temperature=self.temperature,
                     max_tokens=self.max_tokens,
                     stop=_CHATML_STOP,
+                    repeat_penalty=self.repeat_penalty,
                 )
                 content: str = response["choices"][0]["message"]["content"]  # type: ignore[index]
                 # Strip any ChatML markers that leaked through despite stop tokens.
@@ -162,6 +201,8 @@ class BaseAgent(ABC):
                     content = _strip_role_artifacts(content)
                     # Remove parenthetical stage directions the model sometimes appends.
                     content = _strip_stage_directions(content)
+                    # Truncate at repetitive gibberish / degeneration collapse.
+                    content = _strip_degeneration(content)
                 return content
             except Exception as exc:
                 if attempt < _MAX_RETRIES:
@@ -180,7 +221,7 @@ class BaseAgent(ABC):
 
         return ""
 
-    def _generate_stream(self, messages: list[dict]):
+    def _generate_stream(self, messages: list[dict], system_prompt: str | None = None):
         """Token generator for real-time streaming via llama-cpp-python.
 
         Prepends the system prompt and yields content delta strings one at a
@@ -188,7 +229,8 @@ class BaseAgent(ABC):
         callers do not need to handle exceptions.
 
         Args:
-            messages: Chat-completion messages (user/assistant turns).
+            messages:      Chat-completion messages (user/assistant turns).
+            system_prompt: Optional override for ``self.system_prompt``.
 
         Yields:
             Non-empty string tokens from the model's streamed response.
@@ -196,16 +238,16 @@ class BaseAgent(ABC):
         if self.llm is None:
             return
 
-        full_messages = [
-            {"role": "system", "content": self.system_prompt}
-        ] + messages  # streaming always uses default prompt
+        sp = system_prompt if system_prompt is not None else self.system_prompt
+        full_messages = [{"role": "system", "content": sp}] + messages
 
         try:
-            response = self.llm.create_chat_completion(  # type: ignore[union-attr]
+            response = self.llm.create_chat_completion(  # type: ignore[union-attr, attr-defined]
                 messages=full_messages,
                 temperature=self.temperature,
                 max_tokens=self.max_tokens,
                 stop=_CHATML_STOP,
+                repeat_penalty=self.repeat_penalty,
                 stream=True,
             )
             for chunk in response:

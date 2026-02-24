@@ -10,6 +10,7 @@ llm:
   n_gpu_layers: -1           # -1 = all layers on Metal
   n_threads: 4               # CPU threads (Apple Silicon optimal)
   chat_format: "chatml"
+  repeat_penalty: 1.3        # Penalise token repetition to prevent degeneration
 
 embeddings:
   model_name: "NeuML/pubmedbert-base-embeddings"
@@ -53,8 +54,8 @@ agents:
 
 # --- Session ---
 session:
-  max_turns: 40              # Turn limit per session
-  rapport_turns: 3           # Rapport turns before clinical domain exploration
+  max_turns: 34              # Turn limit per session (~15% shorter)
+  rapport_turns: 2           # Rapport turns before clinical domain exploration
   domains:
     - mood
     - anxiety
